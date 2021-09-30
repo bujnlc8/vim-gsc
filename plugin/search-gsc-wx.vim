@@ -57,7 +57,8 @@ function! SearchGscWx(query)
             endif
             execute "normal! Go".join(l:ll, "\n")."\n"
         endfor
-        execute 'go 1'
+        execute 'normal! gg'
+        execute 'normal! dd'
         echo '共'.len(l:json_res['data']['data']).'条相关结果'
     catch
         echo '搜索出错, 请稍后再试:('

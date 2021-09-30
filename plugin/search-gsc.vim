@@ -42,7 +42,8 @@ function! SearchGsc(query)
                 execute "normal! Go".join([l:title, l:dynasty.l:author, l:content."\n"], "\n")
             endif
         endfor
-      execute 'go 1'
+      execute 'normal! gg'
+      execute 'normal! dd'
     catch
         echo '搜索出错, 请稍后再试:('
     endtry
