@@ -14,11 +14,12 @@ OR
 
 ## Command
 
-*   `:SearchGsc` + search_words, it gets result from [西窗烛](http://lib.xcz.im) and it only get 30 items.
+*   `:SearchGsc` + search_words, it gets result from [西窗烛](http://lib.xcz.im) and it only get 30 items. it will append the result to current buffer, if you want put the result to the buffer respectively, you can use `:SearchGscTidy`
 
     You can set the option `g:search_gsc_show_url` to decise show the url or not, default is 0.
+    You can set the option `g:search_gsc_show_item_serial` to decise show the item serial before title or not, default is 1.
 
-*   `:SearchGscWx` + search_words, it gets result from the weixin micro app `i古诗词` and not only 30 items.
+*   `:SearchGscWx` + search_words, it gets result from the weixin micro app `i古诗词` and not only 30 items. it will append the result to current buffer, if you want put the result to the buffer respectively, you can use `:SearchGscWxTidy`
 
     Below is the QR code of `i古诗词`:
 
@@ -40,5 +41,7 @@ OR
     let g:search_gsc_wx_show_appreciation = 0   # whether to show appreciation, default is 0
 
     let g:search_gsc_wx_show_master_comment =0  # whether to show master_comment, default is 0
+
+    let g:search_gsc_wx_show_item_serial =1  # whether to show item serial before title, default is 1
 
     ```
