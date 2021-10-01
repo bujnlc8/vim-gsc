@@ -30,18 +30,18 @@ OR
     You can set more options for the command.
 
     ```
-    let g:search_gsc_wx_show_audio = 1  # whether to show the audio url if the item has a audio, default is 1 
+    let g:search_gsc_wx_show_audio = 1   "whether to show the audio url if the item has a audio, default is 1 
 
-    let g:search_gsc_wx_show_translation = 1 # whether to show translation, default is 1
+    let g:search_gsc_wx_show_translation = 1  "whether to show translation, default is 1
 
-    let g:search_gsc_wx_show_intro = 1   # whether to show intro, default is 1
+    let g:search_gsc_wx_show_intro = 1   "whether to show intro, default is 1
 
-    let g:search_gsc_wx_show_annotation = 0  # whether to show annotation, default is 0
+    let g:search_gsc_wx_show_annotation = 0  "whether to show annotation, default is 0
 
-    let g:search_gsc_wx_show_appreciation = 0   # whether to show appreciation, default is 0
+    let g:search_gsc_wx_show_appreciation = 0   "whether to show appreciation, default is 0
 
-    let g:search_gsc_wx_show_master_comment =0  # whether to show master_comment, default is 0
+    let g:search_gsc_wx_show_master_comment =0   "whether to show master_comment, default is 0
 
-    let g:search_gsc_wx_show_item_serial =1  # whether to show item serial before title, default is 1
+    let g:search_gsc_wx_show_item_serial =1  "whether to show item serial before title, default is 1
 
     ```
