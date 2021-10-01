@@ -28,13 +28,53 @@ if !exists('g:search_gsc_show_item_serial')
     let g:search_gsc_show_item_serial = 1
 endif
 
-function! SearchGsc(query)
+if !exists('g:search_gsc_cache')
+    let g:search_gsc_cache = 1
+endif
+
+if !exists('g:search_gsc_cache_path')
+    let g:search_gsc_cache_path = expand('<sfile>:p:h').'/cache'
+endif
+
+if g:search_gsc_cache
+    if !isdirectory(g:search_gsc_cache_path)
+        call mkdir(g:search_gsc_cache_path)
+    endif
+endif
+
+
+function! SearchGscAppend(query)
     try
-        let l:curl_ = substitute(s:curl, 'SEARCH_PLACEHOLDER', a:query, '')
         echo '正在搜索🔍...'
-        let l:result = system(l:curl_.' | jq')
-        let l:result = substitute(l:result, '^.*result', '', 'g')
-        let l:json_res = json_decode('{"result'.l:result)
+        let l:search = 1
+        let l:query = substitute(a:query, '\s', '', 'g')
+        if g:search_gsc_cache
+            let l:cache_path = g:search_gsc_cache_path.'/'.l:query.'.xcz.gzip.cache'
+            if filereadable(l:cache_path)
+                try
+                    let l:result = readfile(l:cache_path)[0]
+                    let l:result = system('echo "' .l:result.'" | base64 -d | gunzip')
+                    let l:search = 0
+                catch
+                    let l:search = 1
+                endtry
+            endif
+        endif
+        if l:search
+            let l:curl_ = substitute(s:curl, 'SEARCH_PLACEHOLDER', l:query, '')
+            let l:result = system(l:curl_.' | jq')
+            let l:result = substitute(l:result, '^.*result', '', 'g')
+            let l:result = '{"result'.l:result
+            if g:search_gsc_cache
+                try
+                    let l:sss = system("echo '".l:result."' | gzip | base64")
+                    call writefile([l:sss], g:search_gsc_cache_path.'/'.l:query.'.xcz.gzip.cache')
+                catch
+                    call delete(g:search_gsc_cache_path.'/'.l:query.'.xcz.gzip.cache')
+                endtry
+            endif
+        endif
+        let l:json_res = json_decode(l:result)
         let l:num_serial = 0
         for item in l:json_res['result']
             let l:num_serial = l:num_serial + 1
@@ -57,15 +97,25 @@ function! SearchGsc(query)
         call ClearEchoOuput()
         echo '共'.len(l:json_res['result']).'条相关结果'
     catch
+        call ClearEchoOuput()
         echo '搜索出错, 请稍后再试:('
     endtry
 endfunction
 
-function! SearchGscTidy(query)
+function! SearchGsc(query)
     call Clear()
-    call SearchGsc(a:query)
+    call SearchGscAppend(a:query)
     normal! dd
 endfunction
 
-command! -nargs=+  SearchGsc call SearchGsc(<q-args>)
-command! -nargs=+ SearchGscTidy call SearchGscTidy(<q-args>)
+function! SearchGscClearCache(key_word)
+    if len(a:key_word) > 0
+        echo system('rm -rf '.g:search_gsc_cache_path.'/'.substitute(a:key_word, '\s', '', 'g').'.xcz*')
+    else
+        echo system('rm -rf '.g:search_gsc_cache_path.'/*.xcz*')
+    endif
+endfunction
+
+command! -nargs=+  SearchGscAppend call SearchGscAppend(<q-args>)
+command! -nargs=+ SearchGsc call SearchGsc(<q-args>)
+command! -nargs=?  SearchGscClearCache call SearchGscClearCache(<q-args>)

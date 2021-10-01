@@ -28,14 +28,67 @@ if !exists('g:search_gsc_wx_show_item_serial')
     let g:search_gsc_wx_show_item_serial = 1
 endif
 
-function! SearchGscWx(query)
+if !exists('g:search_gsc_wx_cache')
+    let g:search_gsc_wx_cache = 1
+endif
+
+if !exists('g:search_gsc_wx_cache_path')
+    let g:search_gsc_wx_cache_path = expand('<sfile>:p:h').'/cache'
+endif
+
+if g:search_gsc_wx_cache
+    if !isdirectory(g:search_gsc_wx_cache_path)
+        call mkdir(g:search_gsc_wx_cache_path)
+    endif
+endif
+
+function! SearchGscWxAppend(query)
     try
         let l:query = substitute(a:query, '\s', '', 'g')
-        let l:curl_ = substitute(s:curl, 'SEARCH_PLACEHOLDER', l:query, '')
+        let l:search = 1
         echo '正在搜索🔍...'
-        let l:result = system(l:curl_.' |jq')
-        let l:result = substitute(l:result, '^.*code', '', 'g')
-        let l:json_res = json_decode('{"code'.l:result)
+        if g:search_gsc_wx_cache
+            let l:cache_path = g:search_gsc_wx_cache_path.'/'.l:query.'.wx.gzip.cache'
+            if filereadable(l:cache_path)
+                try
+                    let l:result = readfile(l:cache_path)[0]
+                    let l:result = system('echo "' .l:result.'" | base64 -d | gunzip')
+                    let l:search = 0
+                catch
+                    let l:search = 1
+                endtry
+            endif
+            " 尝试搜索.cache
+            let l:cache_path = g:search_gsc_wx_cache_path.'/'.l:query.'.wx.cache'
+            if l:search && filereadable(l:cache_path)
+                try
+                    let l:result = readfile(l:cache_path)[0]
+                    let l:search = 0
+                catch
+                    let l:search = 1
+                endtry
+            endif
+        endif
+        if l:search
+            let l:curl_ = substitute(s:curl, 'SEARCH_PLACEHOLDER', l:query, '')
+            let l:result = system(l:curl_.' | jq')
+            let l:result = substitute(l:result, '^.*code', '', 'g')
+            let l:result = '{"code'.l:result
+            if g:search_gsc_wx_cache
+                try
+                    let l:sss = system("echo '".l:result."' | gzip | base64")
+                    call writefile([l:sss], g:search_gsc_wx_cache_path.'/'.l:query.'.wx.gzip.cache')
+                catch
+                    call delete(g:search_gsc_wx_cache_path.'/'.l:query.'.wx.gzip.cache')
+                    try
+                        call writefile([l:result], g:search_gsc_wx_cache_path.'/'.l:query.'.wx.cache')
+                    catch
+                        call delete(g:search_gsc_wx_cache_path.'/'.l:query.'.wx.cache')
+                    endtry
+                endtry
+            endif
+        endif
+        let l:json_res = json_decode(l:result)
         let l:num_serial = 0
         for item in l:json_res['data']['data']
             let l:num_serial = l:num_serial + 1
@@ -78,6 +131,7 @@ function! SearchGscWx(query)
         echo '共'.len(l:json_res['data']['data']).'条相关结果'
         normal gg
     catch
+        call ClearEchoOuput()
         echo '搜索出错, 请稍后再试:('
     endtry
 endfunction
@@ -90,11 +144,21 @@ function! ClearEchoOuput()
     execute 'redraw!'
 endfunction
 
-function! SearchGscWxTidy(query)
+function! SearchGscWx(query)
     call Clear()
-    call SearchGscWx(a:query)
+    call SearchGscWxAppend(a:query)
     normal! dd
 endfunction
 
+
+function! SearchGscWxClearCache(key_word)
+    if len(a:key_word) > 0
+        echo system('rm -rf '.g:search_gsc_wx_cache_path.'/'.substitute(a:key_word, '\s', '', 'g').'.wx*')
+    else
+        echo system('rm -rf '.g:search_gsc_wx_cache_path.'/*.wx*')
+    endif
+endfunction
+
+command! -nargs=+  SearchGscWxAppend call SearchGscWxAppend(<q-args>)
 command! -nargs=+  SearchGscWx call SearchGscWx(<q-args>)
-command! -nargs=+  SearchGscWxTidy call SearchGscWxTidy(<q-args>)
+command! -nargs=?  SearchGscWxClearCache call SearchGscWxClearCache(<q-args>)
