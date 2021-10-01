@@ -30,7 +30,8 @@ endif
 
 function! SearchGscWx(query)
     try
-        let l:curl_ = substitute(s:curl, 'SEARCH_PLACEHOLDER', a:query, '')
+        let l:query = substitute(a:query, '\s', '', 'g')
+        let l:curl_ = substitute(s:curl, 'SEARCH_PLACEHOLDER', l:query, '')
         echo '正在搜索🔍...'
         let l:result = system(l:curl_.' |jq')
         let l:result = substitute(l:result, '^.*code', '', 'g')
