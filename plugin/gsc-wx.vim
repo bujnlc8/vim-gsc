@@ -1,4 +1,5 @@
 let s:curl = 'curl https://igsc.wx.haihui.site/songci/query/SEARCH_PLACEHOLDER/main/0 -H "User-Agent:vim-plugin"'
+let s:rand_curl = 'curl https://igsc.wx.haihui.site/songci/index/all/vim -H "User-Agent:vim-plugin"'
 
 if !exists('g:gsc_wx_show_audio')
     let g:gsc_wx_show_audio = 1
@@ -160,6 +161,77 @@ function! GscWxAppend(query)
     endtry
 endfunction
 
+function! GscWxRand(num)
+    try
+        if !a:num
+            let l:num = 1
+        else
+            let l:num = a:num + 0
+        endif
+        if l:num > 30 || l:num == 0
+            echo 'arg '.l:num.' is too large, valid value is [1,30].'
+            return
+        endif
+        let l:buf = ''
+        echo '正在随机获取'.l:num.'条记录 🔥...'
+        let l:start_time = reltime()
+        let l:result = system(s:rand_curl.' | jq')
+        let l:result = substitute(l:result, '^.*code', '', 'g')
+        let l:result = '{"code'.l:result
+        let l:json_res = json_decode(l:result)
+        let l:num_serial = 0
+        for item in l:json_res['data']['data']
+            let l:num_serial = l:num_serial + 1
+            if l:num_serial > l:num
+                break
+            endif
+            let l:title = substitute(item['work_title'], '\r', '', 'g')
+            if g:gsc_wx_show_item_serial
+                let l:title = l:num_serial.'.'.l:title
+            endif
+            let l:author = item['work_author']
+            let l:dynasty = '['.item['work_dynasty'].'] '
+            let l:audio_id = item['audio_id']
+            let l:content = substitute(item['content'], '\r', '', 'g')
+            let l:translation = item['translation']
+            let l:intro = item['intro']
+            let l:annotation = item['annotation']
+            let l:appreciation = item['appreciation']
+            let l:master_comment = item['master_comment']
+            let l:ll = [l:title, l:dynasty.l:author, l:content."\n"]
+            if g:gsc_wx_show_audio && l:audio_id > 0
+                let l:ll = add(l:ll, 'https://songci.nos-eastchina1.126.net/audio/'.l:audio_id.'.m4a'."\n")
+            endif
+            if g:gsc_wx_show_intro && len(l:intro) > 0
+                let l:ll = add(l:ll, "评析：\n".l:intro."\n")
+            endif
+            if g:gsc_wx_show_annotation && len(l:annotation) > 0
+                let l:ll = add(l:ll, "注释：\n".l:annotation."\n")
+            endif
+            if g:gsc_wx_show_translation && len(l:translation) > 0
+                let l:ll = add(l:ll, "译文：\n".l:translation."\n")
+            endif
+            if g:gsc_wx_show_appreciation && len(l:appreciation) > 0
+                let l:ll = add(l:ll, "赏析：\n".l:appreciation."\n")
+            endif
+            if g:gsc_wx_show_master_comment && len(l:master_comment) > 0
+                let l:ll = add(l:ll, "辑评：\n".l:master_comment."\n")
+            endif
+            let l:buf = l:buf.join(l:ll, "\n")."\n"
+        endfor
+        call gsc#clear()
+        let @a = l:buf
+        normal! G
+        execute 'put a'
+        normal! k2dd
+        call gsc#clear_echo_output()
+        echo '共获取'.l:num.'条结果，用时 '.reltimestr(reltime(l:start_time)).'s'
+        normal ggdd
+    catch
+        call gsc#clear_echo_output()
+        echo '出错, 请稍后再试:('
+    endtry
+endfunction
 
 function! GscWx(query)
     call gsc#clear()
@@ -191,3 +263,4 @@ endfunction
 command! -nargs=+  GscWxAppend call GscWxAppend(<q-args>)
 command! -nargs=+  GscWx call GscWx(<q-args>)
 command! -nargs=?  GscWxClearCache call GscWxClearCache(<q-args>)
+command! -nargs=?  GscWxRand call GscWxRand(<q-args>)
