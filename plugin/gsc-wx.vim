@@ -64,7 +64,7 @@ function! GscWxAppend(query)
             if filereadable(l:comp_cache_path)
                 try
                     call system(g:gsc_cache_comp_algo.' -d -k -c '.l:comp_cache_path.' > '.l:tmp_cache_path)
-                    let l:buf = readfile(l:tmp_cache_path)[0]
+                    let l:buf = join(readfile(l:tmp_cache_path), "\n")
                     call delete(l:tmp_cache_path)
                     let l:search = 0
                 catch
@@ -75,7 +75,7 @@ function! GscWxAppend(query)
             " 尝试搜索.cache
             if l:search && filereadable(l:cache_path)
                 try
-                    let l:buf = readfile(l:cache_path)[0]
+                    let l:buf = join(readfile(l:cache_path), "\n")
                     let l:search = 0
                 catch
                     let l:search = 1
