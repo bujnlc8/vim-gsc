@@ -57,8 +57,9 @@ function! GscWxAppend(query)
         let l:buf = ''
         echo '正在搜索"'.l:query.'" 🔍...'
         let l:start_time = reltime()
-        let l:comp_cache_path = g:gsc_wx_cache_path.'/'.l:query.'.wx.'.g:gsc_cache_comp_algo[:1].'.cache'
-        let l:cache_path = g:gsc_wx_cache_path.'/'.l:query.'.wx.cache'
+        let l:query_md5 = gsc#md5(l:query)
+        let l:comp_cache_path = g:gsc_wx_cache_path.'/'.l:query_md5.'.wx.'.g:gsc_cache_comp_algo[:1].'.cache'
+        let l:cache_path = g:gsc_wx_cache_path.'/'.l:query_md5.'.wx.cache'
         if g:gsc_wx_cache
             let l:tmp_cache_path = g:gsc_wx_cache_path.'/'.'tmp.tmp'
             if filereadable(l:comp_cache_path)
@@ -169,7 +170,7 @@ endfunction
 
 function! GscWxClearCache(key_word)
     if len(a:key_word) > 0
-        let l:res = system('rm -rf '.g:gsc_wx_cache_path.'/'.substitute(a:key_word, '\s', '', 'g').'.wx*')
+        let l:res = system('rm -rf '.g:gsc_wx_cache_path.'/'.gsc#md5(substitute(a:key_word, '\s', '', 'g')).'.wx*')
     else
         let l:res = system('rm -rf '.g:gsc_wx_cache_path.'/*.wx*')
     endif

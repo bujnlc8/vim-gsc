@@ -50,7 +50,8 @@ function! GscAppend(query)
         let l:query = substitute(a:query, '\s', '', 'g')
         echo '正在搜索"'.l:query.'" 🔍...'
         let l:buf = ''
-        let l:cache_path = g:gsc_cache_path.'/'.l:query.'.xcz.'.g:gsc_cache_comp_algo[0:1].'.cache'
+        let l:query_md5 = gsc#md5(l:query)
+        let l:cache_path = g:gsc_cache_path.'/'.l:query_md5.'.xcz.'.g:gsc_cache_comp_algo[0:1].'.cache'
         if g:gsc_cache
             if filereadable(l:cache_path)
                 try
@@ -116,7 +117,7 @@ endfunction
 
 function! GscClearCache(key_word)
     if len(a:key_word) > 0
-        let l:res = system('rm -rf '.g:gsc_cache_path.'/'.substitute(a:key_word, '\s', '', 'g').'.xcz*')
+        let l:res = system('rm -rf '.g:gsc_cache_path.'/'.gsc#md5(substitute(a:key_word, '\s', '', 'g')).'.xcz*')
     else
         let l:res = system('rm -rf '.g:gsc_cache_path.'/*.xcz*')
     endif

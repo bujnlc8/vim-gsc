@@ -20,3 +20,11 @@ endfunction
 function! gsc#clear_echo_output()
     execute 'redraw!'
 endfunction
+
+function! gsc#md5(s)
+    try
+        return matchstr(system('echo '.a:s.' | md5'), '[a-z 0-9]*')
+    catch
+        return a:s
+    endtry
+endfunction
