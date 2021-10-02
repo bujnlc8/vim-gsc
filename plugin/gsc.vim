@@ -80,9 +80,9 @@ function! GscAppend(query)
                 let l:object_id = item['work']['objectId']
                 let l:content = substitute(item['work']['content'], '\r', '', 'g')
                 if g:gsc_show_url
-                    let l:buf = l:buf.(join([l:title, l:dynasty.l:author, l:content."\n", 'http://lib.xcz.im/work/'.l:object_id."\n"], "\n"))
+                    let l:buf = l:buf.(join([l:title, l:dynasty.l:author, l:content."\n", 'http://lib.xcz.im/work/'.l:object_id."\n"], "\n"))."\n"
                 else
-                    let l:buf = l:buf.(join([l:title, l:dynasty.l:author, l:content."\n"], "\n"))
+                    let l:buf = l:buf.(join([l:title, l:dynasty.l:author, l:content."\n"], "\n"))."\n"
                 endif
             endfor
             let l:buf = l:buf.'GgGg'.len(l:json_res['result'])
