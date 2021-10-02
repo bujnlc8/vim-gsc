@@ -50,11 +50,11 @@ function! GscAppend(query)
         let l:query = substitute(a:query, '\s', '', 'g')
         echo '正在搜索"'.l:query.'" 🔍...'
         let l:buf = ''
+        let l:cache_path = g:gsc_cache_path.'/'.l:query.'.xcz.'.g:gsc_cache_comp_algo[0:1].'.cache'
         if g:gsc_cache
-            let l:cache_path = g:gsc_cache_path.'/'.l:query.'.xcz.gz.cache'
             if filereadable(l:cache_path)
                 try
-                    let l:buf = system('cat "' .l:cache_path.'" | gzip -d')
+                    let l:buf = system('cat "' .l:cache_path.'" | '.g:gsc_cache_comp_algo.' -d')
                     let l:search = 0
                 catch
                     let l:search = 1
@@ -88,9 +88,9 @@ function! GscAppend(query)
             let l:buf = l:buf.'GgGg'.len(l:json_res['result'])
             if g:gsc_cache
                 try
-                    call system("echo '".l:buf."' | gzip --best > ".g:gsc_cache_path.'/'.l:query.'.xcz.gz.cache')
+                    call system("echo '".l:buf."' | ".g:gsc_cache_comp_algo." --best > ".l:cache_path)
                 catch
-                    call delete(g:gsc_cache_path.'/'.l:query.'.xcz.gz.cache')
+                    call delete(l:cache_path)
                 endtry
             endif
         endif

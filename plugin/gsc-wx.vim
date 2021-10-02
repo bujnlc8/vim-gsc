@@ -36,6 +36,14 @@ if !exists('g:gsc_wx_cache_path')
     let g:gsc_wx_cache_path = expand('<sfile>:p:h').'/cache'
 endif
 
+if !exists('g:gsc_cache_comp_algo')
+    let g:gsc_cache_comp_algo = 'gzip'
+endif
+
+if g:gsc_cache_comp_algo != 'gzip' && g:gsc_cache_comp_algo != 'bzip2'
+    echo 'g:gsc_cache_comp_algo must be `gzip` or `bzip2`'
+endif
+
 if g:gsc_wx_cache
     if !isdirectory(g:gsc_wx_cache_path)
         call mkdir(g:gsc_wx_cache_path)
@@ -49,11 +57,15 @@ function! GscWxAppend(query)
         let l:buf = ''
         echo '正在搜索"'.l:query.'" 🔍...'
         let l:start_time = reltime()
+        let l:comp_cache_path = g:gsc_wx_cache_path.'/'.l:query.'.wx.'.g:gsc_cache_comp_algo[:1].'.cache'
+        let l:cache_path = g:gsc_wx_cache_path.'/'.l:query.'.wx.cache'
         if g:gsc_wx_cache
-            let l:cache_path = g:gsc_wx_cache_path.'/'.l:query.'.wx.gz.cache'
-            if filereadable(l:cache_path)
+            let l:tmp_cache_path = g:gsc_wx_cache_path.'/'.'tmp.tmp'
+            if filereadable(l:comp_cache_path)
                 try
-                    let l:buf = system('cat '.l:cache_path.' | gzip -d')
+                    call system(g:gsc_cache_comp_algo.' -d -k -c '.l:comp_cache_path.' > '.l:tmp_cache_path)
+                    let l:buf = readfile(l:tmp_cache_path)[0]
+                    call delete(l:tmp_cache_path)
                     let l:search = 0
                 catch
                     let l:search = 1
@@ -61,7 +73,6 @@ function! GscWxAppend(query)
                 endtry
             endif
             " 尝试搜索.cache
-            let l:cache_path = g:gsc_wx_cache_path.'/'.l:query.'.wx.cache'
             if l:search && filereadable(l:cache_path)
                 try
                     let l:buf = readfile(l:cache_path)[0]
@@ -118,13 +129,16 @@ function! GscWxAppend(query)
             let l:buf = l:buf.'GgGg'.len(l:json_res['data']['data'])
             if g:gsc_wx_cache
                 try
-                    call system("echo '".l:buf."' | gzip --best > ".g:gsc_wx_cache_path.'/'.l:query.'.wx.gz.cache')
+                    call system('echo "'.l:buf.'" | '.g:gsc_cache_comp_algo.'  > '.l:comp_cache_path)
                 catch
-                    call delete(g:gsc_wx_cache_path.'/'.l:query.'.wx.gz.cache')
+                    call delete(l:comp_cache_path)
                     try
-                        call writefile([l:buf], g:gsc_wx_cache_path.'/'.l:query.'.wx.cache')
+                        call writefile([l:buf], l:cache_path)
+                        call system(g:gsc_cache_comp_algo.'  -c '.l:cache_path.' > '.l:comp_cache_path)
+                        call delete(l:cache_path)
                     catch
-                        call delete(g:gsc_wx_cache_path.'/'.l:query.'.wx.cache')
+                        call delete(l:cache_path)
+                        call delete(l:comp_cache_path)
                     endtry
                 endtry
             endif
