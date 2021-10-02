@@ -63,3 +63,5 @@ OR
 *   `:GscClearCache` + [key_word],  clear the cache of xcz, if not specify key_word, it will delete all xcz cache.
 
 *   `:GscWxClearCache` + [key_word],  clear the cache of wx, if not specify key_word, it will delete all wx cache.
+
+*   To search selected word in visual mode, you can add such `vnoremap <buffer> <Leader>gg :call GscWxSearchSelect()<CR>` in your config searching in wx,or add such `vnoremap <buffer> <Leader>cc :call GscSearchSelect()<CR>` searching in xcz website. Of course, you can define your keys if you like.

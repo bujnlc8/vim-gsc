@@ -45,10 +45,10 @@ endif
 
 function! GscAppend(query)
     try
-        echo '正在搜索🔍...'
         let l:search = 1
         let l:start_time = reltime()
         let l:query = substitute(a:query, '\s', '', 'g')
+        echo '正在搜索"'.l:query.'" 🔍...'
         let l:buf = ''
         if g:gsc_cache
             let l:cache_path = g:gsc_cache_path.'/'.l:query.'.xcz.gz.cache'
@@ -76,7 +76,7 @@ function! GscAppend(query)
                     let l:title = l:num_serial.'.'.l:title
                 endif
                 let l:author = item['work']['authorName']
-                let l:dynasty = '['.item['work']['dynasty'].']'
+                let l:dynasty = '['.item['work']['dynasty'].'] '
                 let l:object_id = item['work']['objectId']
                 let l:content = substitute(item['work']['content'], '\r', '', 'g')
                 if g:gsc_show_url
@@ -99,26 +99,38 @@ function! GscAppend(query)
         normal! G
         execute 'put a'
         normal! dd
-        call ClearEchoOuput()
-        echo '共'.(l:total_num + 0).'条相关结果，用时'.reltimestr(reltime(l:start_time)).'s'
+        call gsc#clear_echo_output()
+        echo '搜索"'.l:query.'"，共'.(l:total_num + 0).'条相关结果，用时'.reltimestr(reltime(l:start_time)).'s'
         normal gg
     catch
-        call ClearEchoOuput()
-        echo '搜索出错, 请稍后再试:('
+        call gsc#clear_echo_output()
+        echo '搜索"'.l:query.'"出错, 请稍后再试:('
     endtry
 endfunction
 
 function! Gsc(query)
-    call Clear()
+    call gsc#clear()
     call GscAppend(a:query)
     normal! dd
 endfunction
 
 function! GscClearCache(key_word)
     if len(a:key_word) > 0
-        echo system('rm -rf '.g:gsc_cache_path.'/'.substitute(a:key_word, '\s', '', 'g').'.xcz*')
+        let l:res = system('rm -rf '.g:gsc_cache_path.'/'.substitute(a:key_word, '\s', '', 'g').'.xcz*')
     else
-        echo system('rm -rf '.g:gsc_cache_path.'/*.xcz*')
+        let l:res = system('rm -rf '.g:gsc_cache_path.'/*.xcz*')
+    endif
+    if len(l:res) > 0
+        echo '清除失败, '.l:res
+    else
+        echo '清除成功'
+    endif
+endfunction
+
+function! GscSearchSelect()
+    let l:selected = gsc#get_visual_selection()
+    if len(l:selected) > 0
+        call Gsc(l:selected)
     endif
 endfunction
 

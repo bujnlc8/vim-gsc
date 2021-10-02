@@ -47,7 +47,7 @@ function! GscWxAppend(query)
         let l:query = substitute(a:query, '\s', '', 'g')
         let l:search = 1
         let l:buf = ''
-        echo '正在搜索🔍...'
+        echo '正在搜索"'.l:query.'" 🔍...'
         let l:start_time = reltime()
         if g:gsc_wx_cache
             let l:cache_path = g:gsc_wx_cache_path.'/'.l:query.'.wx.gz.cache'
@@ -86,7 +86,7 @@ function! GscWxAppend(query)
                     let l:title = l:num_serial.'.'.l:title
                 endif
                 let l:author = item['work_author']
-                let l:dynasty = '['.item['work_dynasty'].']'
+                let l:dynasty = '['.item['work_dynasty'].'] '
                 let l:audio_id = item['audio_id']
                 let l:content = substitute(item['content'], '\r', '', 'g')
                 let l:translation = item['translation']
@@ -136,25 +136,18 @@ function! GscWxAppend(query)
         normal! G
         execute 'put a'
         normal! k2dd
-        call ClearEchoOuput()
-        echo '共'.(l:total_num + 0).'条相关结果，用时'.reltimestr(reltime(l:start_time)).'s'
+        call gsc#clear_echo_output()
+        echo '搜索"'.l:query.'"，共'.(l:total_num + 0).'条相关结果，用时'.reltimestr(reltime(l:start_time)).'s'
         normal gg
     catch
-        call ClearEchoOuput()
-        echo '搜索出错, 请稍后再试:('
+        call gsc#clear_echo_output()
+        echo '搜索"'.l:query.'"出错, 请稍后再试:('
     endtry
 endfunction
 
-function! Clear()
-    execute 'normal gg100000dd'
-endfunction
-
-function! ClearEchoOuput()
-    execute 'redraw!'
-endfunction
 
 function! GscWx(query)
-    call Clear()
+    call gsc#clear()
     call GscWxAppend(a:query)
     normal! dd
 endfunction
@@ -162,9 +155,21 @@ endfunction
 
 function! GscWxClearCache(key_word)
     if len(a:key_word) > 0
-        echo system('rm -rf '.g:gsc_wx_cache_path.'/'.substitute(a:key_word, '\s', '', 'g').'.wx*')
+        let l:res = system('rm -rf '.g:gsc_wx_cache_path.'/'.substitute(a:key_word, '\s', '', 'g').'.wx*')
     else
-        echo system('rm -rf '.g:gsc_wx_cache_path.'/*.wx*')
+        let l:res = system('rm -rf '.g:gsc_wx_cache_path.'/*.wx*')
+    endif
+    if len(l:res) > 0
+        echo '清除失败, '.l:res
+    else
+        echo '清除成功'
+    endif
+endfunction
+
+function! GscWxSearchSelect()
+    let l:selected = gsc#get_visual_selection()
+    if len(l:selected) > 0
+        call GscWx(l:selected)
     endif
 endfunction
 
