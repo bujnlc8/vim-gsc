@@ -102,7 +102,7 @@ function! GscWxAppend(query)
                     let l:ll = add(l:ll, "评析：\n".l:intro."\n")
                 endif
                 if g:gsc_wx_show_annotation && len(l:annotation) > 0
-                    let l:ll = add(l:ll, "注释：\n".l:annotation, "\n")
+                    let l:ll = add(l:ll, "注释：\n".l:annotation."\n")
                 endif
                 if g:gsc_wx_show_translation && len(l:translation) > 0
                     let l:ll = add(l:ll, "译文：\n".l:translation."\n")
