@@ -1,4 +1,4 @@
-let s:curl = 'curl "https://avoscloud.com/1.1/call/searchWorks2"
+let s:curl = 'curl -s "https://avoscloud.com/1.1/call/searchWorks2"
             \ -H "authority: avoscloud.com"
             \ -H "x-lc-ua: LeanCloud-JS-SDK/3.15.0 (Browser)"
             \ -H "dnt: 1"
@@ -65,7 +65,7 @@ function! GscAppend(query)
         endif
         if l:search
             let l:curl_ = substitute(s:curl, 'SEARCH_PLACEHOLDER', l:query, '')
-            let l:result = system(l:curl_.' | jq')
+            let l:result = system(l:curl_)
             let l:result = substitute(l:result, '^.*result', '', 'g')
             let l:result = '{"result'.l:result
             let l:json_res = json_decode(l:result)

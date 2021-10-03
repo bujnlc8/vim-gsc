@@ -1,5 +1,5 @@
-let s:curl = 'curl https://igsc.wx.haihui.site/songci/query/SEARCH_PLACEHOLDER/main/0 -H "User-Agent:vim-plugin"'
-let s:rand_curl = 'curl https://igsc.wx.haihui.site/songci/index/all/vim -H "User-Agent:vim-plugin"'
+let s:curl = 'curl -s https://igsc.wx.haihui.site/songci/query/SEARCH_PLACEHOLDER/main/0 -H "User-Agent:vim-plugin"'
+let s:rand_curl = 'curl -s https://igsc.wx.haihui.site/songci/index/all/vim -H "User-Agent:vim-plugin"'
 
 if !exists('g:gsc_wx_show_audio')
     let g:gsc_wx_show_audio = 1
@@ -87,7 +87,7 @@ function! GscWxAppend(query)
         endif
         if l:search
             let l:curl_ = substitute(s:curl, 'SEARCH_PLACEHOLDER', l:query, '')
-            let l:result = system(l:curl_.' | jq')
+            let l:result = system(l:curl_)
             let l:result = substitute(l:result, '^.*code', '', 'g')
             let l:result = '{"code'.l:result
             let l:json_res = json_decode(l:result)
@@ -174,7 +174,7 @@ function! GscWxRand(num)
         let l:buf = ''
         echo '正在随机获取'.l:num.'条记录 🔥...'
         let l:start_time = reltime()
-        let l:result = system(s:rand_curl.' | jq')
+        let l:result = system(s:rand_curl)
         let l:result = substitute(l:result, '^.*code', '', 'g')
         let l:result = '{"code'.l:result
         let l:json_res = json_decode(l:result)
