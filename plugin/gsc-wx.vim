@@ -69,7 +69,7 @@ function! GscWxAppend(query)
             let l:tmp_cache_path = g:gsc_wx_cache_path.'/'.'tmp.tmp'
             if filereadable(l:comp_cache_path)
                 try
-                    call system(g:gsc_cache_comp_algo.' -d -k -c '.l:comp_cache_path.' > '.l:tmp_cache_path)
+                    call system(g:gsc_cache_comp_algo.' -d -c '.l:comp_cache_path.' > '.l:tmp_cache_path)
                     let l:buf = join(readfile(l:tmp_cache_path), "\n")
                     call delete(l:tmp_cache_path)
                     let l:search = 0
