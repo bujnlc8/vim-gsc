@@ -89,6 +89,7 @@ function! GscAppend(query)
             let l:buf = l:buf.'GgGg'.len(l:json_res['result'])
             if g:gsc_cache
                 try
+                    let l:buf = substitute(l:buf, "'", "‘", 'g')
                     call system("echo '".l:buf."' | ".g:gsc_cache_comp_algo." --best > ".l:cache_path)
                 catch
                     call delete(l:cache_path)
@@ -96,11 +97,9 @@ function! GscAppend(query)
             endif
         endif
         let l:total_num = l:buf[match(l:buf, 'GgGg'):][4:]
-        let @a = l:buf
-        normal! G
-        execute 'put a'
-        normal! dd
+        call gsc#write_to_buffer(l:buf)
         call gsc#clear_echo_output()
+        normal! dd
         echo '搜索"'.l:query.'"，共'.(l:total_num + 0).'条相关结果，用时'.reltimestr(reltime(l:start_time)).'s'
         normal gg
     catch

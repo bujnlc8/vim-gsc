@@ -28,3 +28,11 @@ function! gsc#md5(s)
         return a:s
     endtry
 endfunction
+
+function! gsc#write_to_buffer(s)
+        let l:origin = @a
+        let @a = a:s
+        normal! G
+        execute 'put a'
+        let @a = l:origin
+endfunction

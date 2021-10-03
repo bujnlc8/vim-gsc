@@ -131,6 +131,7 @@ function! GscWxAppend(query)
             let l:buf = l:buf.'GgGg'.len(l:json_res['data']['data'])
             if g:gsc_wx_cache
                 try
+                    let l:buf = substitute(l:buf, "'", "‘", 'g')
                     call system("echo '".l:buf."' | ".g:gsc_cache_comp_algo.'  > '.l:comp_cache_path)
                 catch
                     call delete(l:comp_cache_path)
@@ -148,9 +149,7 @@ function! GscWxAppend(query)
         "execute 'normal! Go'.l:buf
         "截取num
         let l:total_num = l:buf[match(l:buf, 'GgGg'):][4:]
-        let @a = l:buf
-        normal! G
-        execute 'put a'
+        call gsc#write_to_buffer(l:buf)
         normal! k2dd
         call gsc#clear_echo_output()
         echo '搜索"'.l:query.'"，共'.(l:total_num + 0).'条相关结果，用时'.reltimestr(reltime(l:start_time)).'s'
@@ -220,9 +219,7 @@ function! GscWxRand(num)
             let l:buf = l:buf.join(l:ll, "\n")."\n"
         endfor
         call gsc#clear()
-        let @a = l:buf
-        normal! G
-        execute 'put a'
+        call gsc#write_to_buffer(l:buf)
         normal! k2dd
         call gsc#clear_echo_output()
         echo '共获取'.l:num.'条结果，用时 '.reltimestr(reltime(l:start_time)).'s'
