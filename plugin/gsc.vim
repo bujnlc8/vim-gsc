@@ -16,9 +16,7 @@ let s:curl = 'curl -s "https://avoscloud.com/1.1/call/searchWorks2"
             \ -H "sec-fetch-dest: empty"
             \ -H "referer: http://lib.xcz.im/"
             \ -H "accept-language: zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"
-            \ --data-raw "{\"q\":\"SEARCH_PLACEHOLDER\"}"
-            \ --compressed'
-
+            \ --data "{\"q\":\"SEARCH_PLACEHOLDER\"}"'
 
 if !exists('g:gsc_show_url')
     let g:gsc_show_url = 0
@@ -68,7 +66,7 @@ function! GscAppend(query)
             let l:result = system(l:curl_)
             let l:result = substitute(l:result, '^.*result', '', 'g')
             let l:result = '{"result'.l:result
-            let l:json_res = json_decode(l:result)
+            let l:json_res = gsc#json_decode(l:result)
             let l:num_serial = 0
             for item in l:json_res['result']
                 let l:num_serial = l:num_serial + 1

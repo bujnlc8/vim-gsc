@@ -22,17 +22,42 @@ function! gsc#clear_echo_output()
 endfunction
 
 function! gsc#md5(s)
-    try
+    if executable('md5')
         return matchstr(system('echo '.a:s.' | md5'), '[a-z 0-9]*')
-    catch
-        return a:s
-    endtry
+    endif
+    return a:s
 endfunction
 
 function! gsc#write_to_buffer(s)
-        let l:origin = @a
-        let @a = a:s
-        normal! G
-        execute 'put a'
-        let @a = l:origin
+    let l:origin = @a
+    let @a = a:s
+    normal! G
+    execute 'put a'
+    let @a = l:origin
+endfunction
+
+
+function! gsc#json_decode(s)
+    let @b = a:s
+    if exists('*json_decode')
+        return json_decode(a:s)
+    endif
+    if has('python')
+python << EOF
+import json
+import vim
+res = json.loads(vim.bindeval('@b'),  encoding='utf-8', strict=False)
+EOF
+    elseif has('python3')
+python3 << EOF
+import json
+import vim
+res = json.loads(vim.bindeval('@b'))
+EOF
+    endif
+    if has('python')
+        return pyeval('res')
+    elseif has('python3')
+        return py3eval('res')
+    endif
 endfunction

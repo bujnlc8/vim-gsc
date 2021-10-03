@@ -45,6 +45,10 @@ if g:gsc_cache_comp_algo != 'gzip' && g:gsc_cache_comp_algo != 'bzip2'
     echo 'g:gsc_cache_comp_algo must be `gzip` or `bzip2`'
 endif
 
+if !executable(g:gsc_cache_comp_algo)
+    echo g:gsc_cache_comp_algo.' is not in your path.'
+endif
+
 if g:gsc_wx_cache
     if !isdirectory(g:gsc_wx_cache_path)
         call mkdir(g:gsc_wx_cache_path)
@@ -90,7 +94,7 @@ function! GscWxAppend(query)
             let l:result = system(l:curl_)
             let l:result = substitute(l:result, '^.*code', '', 'g')
             let l:result = '{"code'.l:result
-            let l:json_res = json_decode(l:result)
+            let l:json_res = gsc#json_decode(l:result)
             let l:num_serial = 0
             for item in l:json_res['data']['data']
                 let l:num_serial = l:num_serial + 1
@@ -177,7 +181,7 @@ function! GscWxRand(num)
         let l:result = system(s:rand_curl)
         let l:result = substitute(l:result, '^.*code', '', 'g')
         let l:result = '{"code'.l:result
-        let l:json_res = json_decode(l:result)
+        let l:json_res = gsc#json_decode(l:result)
         let l:num_serial = 0
         for item in l:json_res['data']['data']
             let l:num_serial = l:num_serial + 1
