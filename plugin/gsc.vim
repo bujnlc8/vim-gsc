@@ -18,6 +18,29 @@ let s:curl = 'curl -s "https://avoscloud.com/1.1/call/searchWorks2"
             \ -H "accept-language: zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"
             \ --data "{\"q\":\"SEARCH_PLACEHOLDER\"}"'
 
+let s:curl_by_id = 'curl -s "https://avoscloud.com/1.1/call/getWorkById"
+            \ -H "authority: avoscloud.com"
+            \ -H "x-lc-ua: LeanCloud-JS-SDK/3.15.0 (Browser)"
+            \ -H "dnt: 1"
+            \ -H "sec-ch-ua-mobile: ?0"
+            \ -H "user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36"
+            \ -H "content-type: application/json;charset=UTF-8"
+            \ -H "x-lc-sign: 8e33bfbb3625e1b6a261487dc7f38dca,1633015485114"
+            \ -H "x-lc-session: saxj96gey4hqsy7wxp4zrnywp"
+            \ -H "x-lc-id: 9pq709je4y36ubi10xphdpovula77enqrz27idozgry7x644"
+            \ -H "x-lc-prod: 1"
+            \ -H "accept: */*"
+            \ -H "origin: http://lib.xcz.im"
+            \ -H "sec-fetch-site: cross-site"
+            \ -H "sec-fetch-mode: cors"
+            \ -H "sec-fetch-dest: empty"
+            \ -H "referer: http://lib.xcz.im/"
+            \ -H "accept-language: zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"
+            \ --data "{\"workId\":\"WORK_ID\"}"'
+
+
+let s:curl_get_by_id_wx = 'curl -s https://igsc.wx.haihui.site/songci/index/WORK_ID/vim -H "User-Agent:vim-plugin"'
+
 if !exists('g:gsc_show_url')
     let g:gsc_show_url = 0
 endif
@@ -34,8 +57,20 @@ if !exists('g:gsc_highlight')
     let g:gsc_highlight = 1
 endif
 
+let g:gsc_plugin_path = expand('<sfile>:p:h')
+
+let g:gsc_map_cache = g:gsc_plugin_path.'/.map'
+
+if !isdirectory(g:gsc_map_cache)
+    call mkdir(g:gsc_map_cache)
+endif
+
 if !exists('g:gsc_cache_path')
-    let g:gsc_cache_path = expand('<sfile>:p:h').'/cache'
+    let g:gsc_cache_path = g:gsc_plugin_path.'/cache'
+endif
+
+if !exists('g:gsc_collect_path')
+    let g:gsc_collect_path = expand('~/.vim_gsc_collect', ':p')
 endif
 
 if g:gsc_cache
@@ -44,9 +79,7 @@ if g:gsc_cache
     endif
 endif
 
-
 function! GscAppend(query)
-    try
         let l:search = 1
         let l:start_time = reltime()
         let l:query = substitute(a:query, '\s', '', 'g')
@@ -74,25 +107,8 @@ function! GscAppend(query)
             let l:num_serial = 0
             for item in l:json_res['result']
                 let l:num_serial = l:num_serial + 1
-                let l:title = substitute(item['work']['title'], '\r', '', 'g')
-                if g:gsc_show_item_serial
-                    let l:title = l:num_serial.'.'.l:title
-                endif
-                let l:author = item['work']['authorName']
-                let l:dynasty = '['.item['work']['dynasty'].'] '
-                let l:object_id = item['work']['objectId']
-                let l:url = '🔗 http://lib.xcz.im/work/'.l:object_id
-                let l:content = substitute(item['work']['content'], '\r', '', 'g')
-                let l:author = l:dynasty.l:author
-                if g:gsc_highlight
-                    let l:title = nr2char(2).l:title.nr2char(2)
-                    let l:content = nr2char(1).join(split(l:content, "\n"), "\n".nr2char(1))
-                endif
-                if g:gsc_show_url
-                    let l:buf = l:buf.(join([l:title, l:author, l:content."\n", l:url."\n"], "\n"))."\n"
-                else
-                    let l:buf = l:buf.(join([l:title, l:dynasty, l:content."\n"], "\n"))."\n"
-                endif
+                let l:ll = gsc#process_item(s:process_item(item['work']['objectId'], '#'), l:num_serial, '#')
+                let l:buf = l:buf.join(l:ll, "\n")."\n"
             endfor
             let l:buf = l:buf.'GgGg'.len(l:json_res['result'])
             if g:gsc_cache
@@ -111,11 +127,160 @@ function! GscAppend(query)
         echo '搜索"'.l:query.'"，共'.(l:total_num + 0).'条相关结果，用时'.reltimestr(reltime(l:start_time)).'s'
         normal gg
         setlocal filetype=gsc
+endfunction
+
+function! GscCollect(words)
+    let l:words = substitute(a:words, '\s', '', 'g')
+    let l:words_md5 = gsc#md5(l:words)
+    let l:prefix = '@'
+    let l:map_file = g:gsc_map_cache.'/'.l:prefix.l:words_md5[:1]
+    if !filereadable(l:map_file)
+        let l:prefix = '#'
+        let l:map_file = g:gsc_map_cache.'/'.l:prefix.l:words_md5[:1]
+        if !filereadable(l:map_file)
+            echo '找不到id'
+            return
+        endif
+    endif
+    let l:data = readfile(l:map_file)
+    let l:object_id = ''
+    for item in l:data
+        if match(item, l:words_md5) != -1
+            let l:object_id = split(item, ':')[1]
+            break
+        endif
+    endfor
+    if len(l:object_id) == 0
+        echo '找不到id'
+        return
+    endif
+    try
+        if filereadable(g:gsc_collect_path)
+            for x in readfile(g:gsc_collect_path)
+                if x == l:prefix.l:object_id
+                    echo '收藏成功'
+                    return
+                endif
+            endfor
+        endif
+        call writefile([l:prefix.l:object_id.':'.strftime('%Y%m%d%H%M%S').l:words], g:gsc_collect_path, 'a')
+        echo '收藏成功'
     catch
-        call gsc#clear_echo_output()
-        echo '搜索"'.l:query.'"出错, 请稍后再试:('
+        echo '收藏失败'
     endtry
 endfunction
+
+function! s:process_item(work_id, work_type)
+    let l:work_md5 = gsc#md5(a:work_type.a:work_id)
+    if a:work_type == '#'
+        let l:cache_path = g:gsc_cache_path.'/'.l:work_md5.'.xcz.'.g:gsc_cache_comp_algo[0:1].'.cache'
+        let res = ''
+        if g:gsc_cache
+            if filereadable(l:cache_path)
+                try
+                    let l:res = system('cat "' .l:cache_path.'" | '.g:gsc_cache_comp_algo.' -d')
+                catch
+                    let l:res = ''
+                endtry
+            endif
+        endif
+        if len(l:res) == 0
+            let l:curl = substitute(s:curl_by_id, 'WORK_ID', a:work_id, 'g')
+            let l:result = system(l:curl)
+            let l:result = gsc#json_decode(l:result)['result']
+            let l:res = {
+                        \'id': a:work_id,
+                        \'work_title': l:result['title'],
+                        \ 'content': l:result['content'],
+                        \'audio_id': 0,
+                        \'work_author': l:result['authorName'],
+                        \'work_dynasty': l:result['dynasty'],
+                        \'translation': l:result['translation'],
+                        \'intro': l:result['intro'],
+                        \'annotation': l:result['annotation'],
+                        \'appreciation': l:result['appreciation'],
+                        \'master_comment': l:result['masterComment'],
+                        \}
+            if g:gsc_cache
+                try
+                    let l:buf = gsc#json_encode(l:res)
+                    let l:buf = substitute(l:buf, "'", "‘", 'g')
+                    call system("echo '".l:buf."' | ".g:gsc_cache_comp_algo." --best > ".l:cache_path)
+                catch
+                    call delete(l:cache_path)
+                endtry
+            endif
+            return l:res
+        else
+            return gsc#json_decode(l:res)
+        endif
+    else
+        let l:cache_path = g:gsc_wx_cache_path.'/'.l:work_md5.'.wx.'.g:gsc_cache_comp_algo[0:1].'.cache'
+        let res = ''
+        if g:gsc_wx_cache
+            if filereadable(l:cache_path)
+                try
+                    let l:res = system('cat "' .l:cache_path.'" | '.g:gsc_cache_comp_algo.' -d')
+                catch
+                    let l:res = ''
+                endtry
+            endif
+        endif
+        if len(l:res) == 0
+            let l:res = system(substitute(s:curl_get_by_id_wx, 'WORK_ID', a:work_id, 'g'))
+            if g:gsc_wx_cache
+                try
+                    let l:buf = substitute(l:res, "'", "‘", 'g')
+                    call system("echo '".l:buf."' | ".g:gsc_cache_comp_algo." --best > ".l:cache_path)
+                catch
+                    call delete(l:cache_path)
+                endtry
+            endif
+            return gsc#json_decode(l:res)['data']['data']
+        else
+            return gsc#json_decode(l:res)['data']['data']
+        endif
+    endif
+endfunction
+
+function! GscCollectList(num)
+    if a:num
+        let l:num = a:num + 0
+        if l:num <= 0
+            echo '请输入正确的数量'
+            return
+        endif
+    else
+        let l:num = 100000
+    endif
+    let l:start_time = reltime()
+    if filereadable(g:gsc_collect_path)
+        let l:num_serial = 0
+        let l:buf = ''
+        for x in readfile(g:gsc_collect_path)
+            if l:num_serial >= l:num
+                break
+            endif
+            let l:num_serial = l:num_serial + 1
+            let l:tmp = split(x, ':')[0]
+            let l:ll = s:process_item(l:tmp[1:], l:tmp[0])
+            let l:buf = l:buf.join(gsc#process_item(l:ll, l:num_serial, x[0]), "\n")."\n"
+        endfor
+        if len(l:buf) == 0
+            echo '当前没有收藏，你可以执行 :GscCollect `$title$author$content[:2]来添加!'
+            return
+        endif
+        call gsc#clear()
+        call gsc#write_to_buffer(l:buf)
+        call gsc#clear_echo_output()
+        normal! ggdd
+        setlocal filetype=gsc
+        echo '总共取回'.l:num_serial.'条收藏记录，用时'.reltimestr(reltime(l:start_time)).'s'
+    else
+        echo '当前没有收藏，请检查文件'.g:gsc_collect_path.'的读写权限，或者你可以尝试执行 :GscCollect `$title$author$content[:2]来添加!'
+    endif
+endfunction
+
 
 function! Gsc(query)
     call gsc#clear()
@@ -136,10 +301,16 @@ function! GscClearCache(key_word)
     endif
 endfunction
 
-function! GscSearchSelect()
+function! GscSearchSelect(work_type)
     let l:selected = gsc#get_visual_selection()
     if len(l:selected) > 0
-        call Gsc(l:selected)
+        if a:work_type == '#'
+            call Gsc(l:selected)
+        else
+            call GscWx(l:selected)
+        endif
+    else
+        echo '请选择搜索词'
     endif
 endfunction
 
@@ -149,3 +320,5 @@ au BufNewFile,BufRead *.gsc set filetype=gsc
 command! -nargs=+  GscAppend call GscAppend(<q-args>)
 command! -nargs=+ Gsc call Gsc(<q-args>)
 command! -nargs=?  GscClearCache call GscClearCache(<q-args>)
+command! -nargs=+ GscCollect call GscCollect(<q-args>)
+command! -nargs=? GscCollectList call GscCollectList(<q-args>)

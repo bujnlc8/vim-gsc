@@ -56,222 +56,110 @@ if g:gsc_wx_cache
 endif
 
 function! GscWxAppend(query)
-    try
-        let l:query = substitute(a:query, '\s', '', 'g')
-        let l:search = 1
-        let l:buf = ''
-        echo '正在搜索"'.l:query.'" 🔍...'
-        let l:start_time = reltime()
-        let l:query_md5 = gsc#md5(l:query)
-        let l:comp_cache_path = g:gsc_wx_cache_path.'/'.l:query_md5.'.wx.'.g:gsc_cache_comp_algo[:1].'.cache'
-        let l:cache_path = g:gsc_wx_cache_path.'/'.l:query_md5.'.wx.cache'
-        if g:gsc_wx_cache
-            let l:tmp_cache_path = g:gsc_wx_cache_path.'/'.'tmp.tmp'
-            if filereadable(l:comp_cache_path)
-                try
-                    call system(g:gsc_cache_comp_algo.' -d -c '.l:comp_cache_path.' > '.l:tmp_cache_path)
-                    let l:buf = join(readfile(l:tmp_cache_path), "\n")
-                    call delete(l:tmp_cache_path)
-                    let l:search = 0
-                catch
-                    let l:search = 1
-                    let l:buf = ''
-                endtry
-            endif
-            " 尝试搜索.cache
-            if l:search && filereadable(l:cache_path)
-                try
-                    let l:buf = join(readfile(l:cache_path), "\n")
-                    let l:search = 0
-                catch
-                    let l:search = 1
-                    let l:buf = ''
-                endtry
-            endif
+    let l:query = substitute(a:query, '\s', '', 'g')
+    let l:search = 1
+    let l:buf = ''
+    echo '正在搜索"'.l:query.'" 🔍...'
+    let l:start_time = reltime()
+    let l:query_md5 = gsc#md5(l:query)
+    let l:comp_cache_path = g:gsc_wx_cache_path.'/'.l:query_md5.'.wx.'.g:gsc_cache_comp_algo[:1].'.cache'
+    let l:cache_path = g:gsc_wx_cache_path.'/'.l:query_md5.'.wx.cache'
+    if g:gsc_wx_cache
+        let l:tmp_cache_path = g:gsc_wx_cache_path.'/'.'tmp.tmp'
+        if filereadable(l:comp_cache_path)
+            try
+                call system(g:gsc_cache_comp_algo.' -d -c '.l:comp_cache_path.' > '.l:tmp_cache_path)
+                let l:buf = join(readfile(l:tmp_cache_path), "\n")
+                call delete(l:tmp_cache_path)
+                let l:search = 0
+            catch
+                let l:search = 1
+                let l:buf = ''
+            endtry
         endif
-        if l:search
-            let l:curl_ = substitute(s:curl, 'SEARCH_PLACEHOLDER', l:query, '')
-            let l:result = system(l:curl_)
-            let l:result = substitute(l:result, '^.*code', '', 'g')
-            let l:result = '{"code'.l:result
-            let l:json_res = gsc#json_decode(l:result)
-            let l:num_serial = 0
-            for item in l:json_res['data']['data']
-                let l:num_serial = l:num_serial + 1
-                let l:title = substitute(item['work_title'], '\r', '', 'g')
-                if g:gsc_wx_show_item_serial
-                    let l:title = l:num_serial.'.'.l:title
-                endif
-                let l:author = item['work_author']
-                let l:dynasty = '['.item['work_dynasty'].'] '
-                let l:audio_id = item['audio_id']
-                let l:content = substitute(item['content'], '\r', '', 'g')
-                let l:translation = item['translation']
-                let l:intro = item['intro']
-                let l:annotation = item['annotation']
-                let l:appreciation = item['appreciation']
-                let l:master_comment = item['master_comment']
-                if g:gsc_highlight
-                    let l:title = nr2char(2).l:title.nr2char(2)
-                    let l:content = nr2char(1).join(split(l:content, "\n"), "\n".nr2char(1))
-                endif
-                let l:ll = [l:title, l:dynasty.l:author, l:content."\n"]
-                if g:gsc_wx_show_audio && l:audio_id > 0
-                    let l:ll = add(l:ll, '🔊 https://songci.nos-eastchina1.126.net/audio/'.l:audio_id.'.m4a'."\n")
-                endif
-                if g:gsc_wx_show_intro && len(l:intro) > 0
-                    if g:gsc_highlight
-                        let l:intro = nr2char(3).join(split(l:intro, "\n"), "\n".nr2char(3))
-                    endif
-                    let l:ll = add(l:ll, nr2char(1)."评析：".nr2char(1)."\n".l:intro."\n")
-                endif
-                if g:gsc_wx_show_annotation && len(l:annotation) > 0
-                    if g:gsc_highlight
-                        let l:annotation = nr2char(4).join(split(l:annotation, "\n"), "\n".nr2char(4))
-                    endif
-                    let l:ll = add(l:ll, nr2char(1)."注释：".nr2char(1)."\n".l:annotation."\n")
-                endif
-                if g:gsc_wx_show_translation && len(l:translation) > 0
-                    if g:gsc_highlight
-                        let l:translation = nr2char(5).join(split(l:translation, "\n"), "\n".nr2char(5))
-                    endif
-                    let l:ll = add(l:ll, nr2char(1)."译文：".nr2char(1)."\n".l:translation."\n")
-                endif
-                if g:gsc_wx_show_appreciation && len(l:appreciation) > 0
-                    if g:gsc_highlight
-                        let l:appreciation = nr2char(6).join(split(l:appreciation, "\n"), "\n".nr2char(6))
-                    endif
-                    let l:ll = add(l:ll, nr2char(1)."赏析：".nr2char(1)."\n".l:appreciation."\n")
-                endif
-                if g:gsc_wx_show_master_comment && len(l:master_comment) > 0
-                    if g:gsc_highlight
-                        let l:master_comment = nr2char(7).join(split(l:master_comment, "\n"), "\n".nr2char(7))
-                    endif
-                    let l:ll = add(l:ll,nr2char(1)."辑评：".nr2char(1)."\n".l:master_comment."\n")
-                endif
-                let l:buf = l:buf.join(l:ll, "\n")."\n"
-            endfor
-            let l:buf = l:buf.'GgGg'.len(l:json_res['data']['data'])
-            if g:gsc_wx_cache
-                try
-                    let l:buf = substitute(l:buf, "'", "‘", 'g')
-                    call system("echo '".l:buf."' | ".g:gsc_cache_comp_algo.'  > '.l:comp_cache_path)
-                catch
-                    call delete(l:comp_cache_path)
-                    try
-                        call writefile([l:buf], l:cache_path)
-                        call system(g:gsc_cache_comp_algo.'  -c '.l:cache_path.' > '.l:comp_cache_path)
-                        call delete(l:cache_path)
-                    catch
-                        call delete(l:cache_path)
-                        call delete(l:comp_cache_path)
-                    endtry
-                endtry
-            endif
+        " 尝试搜索.cache
+        if l:search && filereadable(l:cache_path)
+            try
+                let l:buf = join(readfile(l:cache_path), "\n")
+                let l:search = 0
+            catch
+                let l:search = 1
+                let l:buf = ''
+            endtry
         endif
-        "execute 'normal! Go'.l:buf
-        "截取num
-        let l:total_num = l:buf[match(l:buf, 'GgGg'):][4:]
-        call gsc#write_to_buffer(l:buf)
-        normal! k2dd
-        call gsc#clear_echo_output()
-        echo '搜索"'.l:query.'"，共'.(l:total_num + 0).'条相关结果，用时'.reltimestr(reltime(l:start_time)).'s'
-        normal gg
-        setlocal filetype=gsc
-    catch
-        call gsc#clear_echo_output()
-        echo '搜索"'.l:query.'"出错, 请稍后再试:('
-    endtry
-endfunction
-
-function! GscWxRand(num)
-    try
-        if !a:num
-            let l:num = 1
-        else
-            let l:num = a:num + 0
-        endif
-        if l:num > 30 || l:num == 0
-            echo 'arg '.l:num.' is too large, valid value is [1,30].'
-            return
-        endif
-        let l:buf = ''
-        echo '正在随机获取'.l:num.'条记录 🔥...'
-        let l:start_time = reltime()
-        let l:result = system(s:rand_curl)
+    endif
+    if l:search
+        let l:curl_ = substitute(s:curl, 'SEARCH_PLACEHOLDER', l:query, '')
+        let l:result = system(l:curl_)
         let l:result = substitute(l:result, '^.*code', '', 'g')
         let l:result = '{"code'.l:result
         let l:json_res = gsc#json_decode(l:result)
         let l:num_serial = 0
         for item in l:json_res['data']['data']
             let l:num_serial = l:num_serial + 1
-            if l:num_serial > l:num
-                break
-            endif
-            let l:title = substitute(item['work_title'], '\r', '', 'g')
-            if g:gsc_wx_show_item_serial
-                let l:title = l:num_serial.'.'.l:title
-            endif
-            let l:author = item['work_author']
-            let l:dynasty = '['.item['work_dynasty'].'] '
-            let l:audio_id = item['audio_id']
-            let l:content = substitute(item['content'], '\r', '', 'g')
-            let l:translation = item['translation']
-            let l:intro = item['intro']
-            let l:annotation = item['annotation']
-            let l:appreciation = item['appreciation']
-            let l:master_comment = item['master_comment']
-            if g:gsc_highlight
-                let l:title = nr2char(2).l:title.nr2char(2)
-                let l:content = nr2char(1).join(split(l:content, "\n"), "\n".nr2char(1))
-            endif
-            let l:ll = [l:title, l:dynasty.l:author, l:content."\n"]
-            if g:gsc_wx_show_audio && l:audio_id > 0
-                let l:ll = add(l:ll, '🔊 https://songci.nos-eastchina1.126.net/audio/'.l:audio_id.'.m4a'."\n")
-            endif
-            if g:gsc_wx_show_intro && len(l:intro) > 0
-                if g:gsc_highlight
-                    let l:intro = nr2char(3).join(split(l:intro, "\n"), "\n".nr2char(3))
-                endif
-                let l:ll = add(l:ll, nr2char(1)."评析：".nr2char(1)."\n".l:intro."\n")
-            endif
-            if g:gsc_wx_show_annotation && len(l:annotation) > 0
-                if g:gsc_highlight
-                    let l:annotation = nr2char(4).join(split(l:annotation, "\n"), "\n".nr2char(4))
-                endif
-                let l:ll = add(l:ll, nr2char(1)."注释：".nr2char(1)."\n".l:annotation."\n")
-            endif
-            if g:gsc_wx_show_translation && len(l:translation) > 0
-                if g:gsc_highlight
-                    let l:translation = nr2char(5).join(split(l:translation, "\n"), "\n".nr2char(5))
-                endif
-                let l:ll = add(l:ll, nr2char(1)."译文：".nr2char(1)."\n".l:translation."\n")
-            endif
-            if g:gsc_wx_show_appreciation && len(l:appreciation) > 0
-                if g:gsc_highlight
-                    let l:appreciation = nr2char(6).join(split(l:appreciation, "\n"), "\n".nr2char(6))
-                endif
-                let l:ll = add(l:ll, nr2char(1)."赏析：".nr2char(1)."\n".l:appreciation."\n")
-            endif
-            if g:gsc_wx_show_master_comment && len(l:master_comment) > 0
-                if g:gsc_highlight
-                    let l:master_comment = nr2char(7).join(split(l:master_comment, "\n"), "\n".nr2char(7))
-                endif
-                let l:ll = add(l:ll, nr2char(1)."辑评：".nr2char(1)."\n".l:master_comment."\n")
-            endif
-            let l:buf = l:buf.join(l:ll, "\n")."\n"
+            let l:buf = l:buf.join(gsc#process_item(item, l:num_serial, '@'), "\n")."\n"
         endfor
-        call gsc#clear()
-        call gsc#write_to_buffer(l:buf)
-        normal! k2dd
-        call gsc#clear_echo_output()
-        echo '共获取'.l:num.'条结果，用时 '.reltimestr(reltime(l:start_time)).'s'
-        normal ggdd
-        setlocal filetype=gsc
-    catch
-        call gsc#clear_echo_output()
-        echo '出错, 请稍后再试:('
-    endtry
+        let l:buf = l:buf.'GgGg'.len(l:json_res['data']['data'])
+        if g:gsc_wx_cache
+            try
+                let l:buf = substitute(l:buf, "'", "‘", 'g')
+                call system("echo '".l:buf."' | ".g:gsc_cache_comp_algo.'  > '.l:comp_cache_path)
+            catch
+                call delete(l:comp_cache_path)
+                try
+                    call writefile([l:buf], l:cache_path)
+                    call system(g:gsc_cache_comp_algo.'  -c '.l:cache_path.' > '.l:comp_cache_path)
+                    call delete(l:cache_path)
+                catch
+                    call delete(l:cache_path)
+                    call delete(l:comp_cache_path)
+                endtry
+            endtry
+        endif
+    endif
+    "execute 'normal! Go'.l:buf
+    "截取num
+    let l:total_num = l:buf[match(l:buf, 'GgGg'):][4:]
+    call gsc#write_to_buffer(l:buf)
+    normal! k2dd
+    call gsc#clear_echo_output()
+    echo '搜索"'.l:query.'"，共'.(l:total_num + 0).'条相关结果，用时'.reltimestr(reltime(l:start_time)).'s'
+    normal gg
+    setlocal filetype=gsc
+endfunction
+
+function! GscWxRand(num)
+    if !a:num
+        let l:num = 1
+    else
+        let l:num = a:num + 0
+    endif
+    if l:num > 30 || l:num == 0
+        echo 'arg '.l:num.' is too large, valid value is [1,30].'
+        return
+    endif
+    let l:buf = ''
+    echo '正在随机获取'.l:num.'条记录 🔥...'
+    let l:start_time = reltime()
+    let l:result = system(s:rand_curl)
+    let l:result = substitute(l:result, '^.*code', '', 'g')
+    let l:result = '{"code'.l:result
+    let l:json_res = gsc#json_decode(l:result)
+    let l:num_serial = 0
+    for item in l:json_res['data']['data']
+        let l:num_serial = l:num_serial + 1
+        if l:num_serial > l:num
+            break
+        endif
+        let l:buf = l:buf.join(gsc#process_item(item, l:num_serial, '@'), "\n")."\n"
+    endfor
+    call gsc#clear()
+    call gsc#write_to_buffer(l:buf)
+    normal! k2dd
+    call gsc#clear_echo_output()
+    echo '共获取'.l:num.'条结果，用时 '.reltimestr(reltime(l:start_time)).'s'
+    normal ggdd
+    setlocal filetype=gsc
 endfunction
 
 function! GscWx(query)
@@ -291,13 +179,6 @@ function! GscWxClearCache(key_word)
         echo '清除失败, '.l:res
     else
         echo '清除成功'
-    endif
-endfunction
-
-function! GscWxSearchSelect()
-    let l:selected = gsc#get_visual_selection()
-    if len(l:selected) > 0
-        call GscWx(l:selected)
     endif
 endfunction
 
