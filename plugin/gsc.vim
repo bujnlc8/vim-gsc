@@ -81,7 +81,7 @@ function! GscAppend(query)
                 let l:author = item['work']['authorName']
                 let l:dynasty = '['.item['work']['dynasty'].'] '
                 let l:object_id = item['work']['objectId']
-                let l:url = 'http://lib.xcz.im/work/'.l:object_id
+                let l:url = '🔗 http://lib.xcz.im/work/'.l:object_id
                 let l:content = substitute(item['work']['content'], '\r', '', 'g')
                 let l:author = l:dynasty.l:author
                 if g:gsc_highlight

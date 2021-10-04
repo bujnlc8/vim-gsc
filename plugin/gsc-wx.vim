@@ -117,7 +117,7 @@ function! GscWxAppend(query)
                 endif
                 let l:ll = [l:title, l:dynasty.l:author, l:content."\n"]
                 if g:gsc_wx_show_audio && l:audio_id > 0
-                    let l:ll = add(l:ll, 'https://songci.nos-eastchina1.126.net/audio/'.l:audio_id.'.m4a'."\n")
+                    let l:ll = add(l:ll, '🔊 https://songci.nos-eastchina1.126.net/audio/'.l:audio_id.'.m4a'."\n")
                 endif
                 if g:gsc_wx_show_intro && len(l:intro) > 0
                     if g:gsc_highlight
@@ -227,7 +227,7 @@ function! GscWxRand(num)
             endif
             let l:ll = [l:title, l:dynasty.l:author, l:content."\n"]
             if g:gsc_wx_show_audio && l:audio_id > 0
-                let l:ll = add(l:ll, 'https://songci.nos-eastchina1.126.net/audio/'.l:audio_id.'.m4a'."\n")
+                let l:ll = add(l:ll, '🔊 https://songci.nos-eastchina1.126.net/audio/'.l:audio_id.'.m4a'."\n")
             endif
             if g:gsc_wx_show_intro && len(l:intro) > 0
                 if g:gsc_highlight
