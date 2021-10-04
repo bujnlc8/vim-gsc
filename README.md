@@ -67,3 +67,7 @@ OR
 *   To search selected word in visual mode, you can add such `vnoremap <buffer> <Leader>gg :call GscWxSearchSelect()<CR>` in your config searching in wx,you can also add such `vnoremap <buffer> <Leader>cc :call GscSearchSelect()<CR>` for searching in xcz website. Of course, you can define your keys if you like.
 
 *   `:GscWxRand` + [num], fetch num items from wx randomly, if num is not set, num equals 1.
+
+## Appearance
+
+[![4OO2uV.png](https://z3.ax1x.com/2021/10/04/4OO2uV.png)](https://imgtu.com/i/4OO2uV)
