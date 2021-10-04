@@ -111,24 +111,43 @@ function! GscWxAppend(query)
                 let l:annotation = item['annotation']
                 let l:appreciation = item['appreciation']
                 let l:master_comment = item['master_comment']
+                if g:gsc_highlight
+                    let l:title = nr2char(2).l:title.nr2char(2)
+                    let l:content = nr2char(1).join(split(l:content, "\n"), "\n".nr2char(1))
+                endif
                 let l:ll = [l:title, l:dynasty.l:author, l:content."\n"]
                 if g:gsc_wx_show_audio && l:audio_id > 0
                     let l:ll = add(l:ll, 'https://songci.nos-eastchina1.126.net/audio/'.l:audio_id.'.m4a'."\n")
                 endif
                 if g:gsc_wx_show_intro && len(l:intro) > 0
-                    let l:ll = add(l:ll, "评析：\n".l:intro."\n")
+                    if g:gsc_highlight
+                        let l:intro = nr2char(3).join(split(l:intro, "\n"), "\n".nr2char(3))
+                    endif
+                    let l:ll = add(l:ll, nr2char(1)."评析：".nr2char(1)."\n".l:intro."\n")
                 endif
                 if g:gsc_wx_show_annotation && len(l:annotation) > 0
-                    let l:ll = add(l:ll, "注释：\n".l:annotation."\n")
+                    if g:gsc_highlight
+                        let l:annotation = nr2char(4).join(split(l:annotation, "\n"), "\n".nr2char(4))
+                    endif
+                    let l:ll = add(l:ll, nr2char(1)."注释：".nr2char(1)."\n".l:annotation."\n")
                 endif
                 if g:gsc_wx_show_translation && len(l:translation) > 0
-                    let l:ll = add(l:ll, "译文：\n".l:translation."\n")
+                    if g:gsc_highlight
+                        let l:translation = nr2char(5).join(split(l:translation, "\n"), "\n".nr2char(5))
+                    endif
+                    let l:ll = add(l:ll, nr2char(1)."译文：".nr2char(1)."\n".l:translation."\n")
                 endif
                 if g:gsc_wx_show_appreciation && len(l:appreciation) > 0
-                    let l:ll = add(l:ll, "赏析：\n".l:appreciation."\n")
+                    if g:gsc_highlight
+                        let l:appreciation = nr2char(6).join(split(l:appreciation, "\n"), "\n".nr2char(6))
+                    endif
+                    let l:ll = add(l:ll, nr2char(1)."赏析：".nr2char(1)."\n".l:appreciation."\n")
                 endif
                 if g:gsc_wx_show_master_comment && len(l:master_comment) > 0
-                    let l:ll = add(l:ll, "辑评：\n".l:master_comment."\n")
+                    if g:gsc_highlight
+                        let l:master_comment = nr2char(7).join(split(l:master_comment, "\n"), "\n".nr2char(7))
+                    endif
+                    let l:ll = add(l:ll,nr2char(1)."辑评：".nr2char(1)."\n".l:master_comment."\n")
                 endif
                 let l:buf = l:buf.join(l:ll, "\n")."\n"
             endfor
@@ -158,6 +177,7 @@ function! GscWxAppend(query)
         call gsc#clear_echo_output()
         echo '搜索"'.l:query.'"，共'.(l:total_num + 0).'条相关结果，用时'.reltimestr(reltime(l:start_time)).'s'
         normal gg
+        setlocal filetype=gsc
     catch
         call gsc#clear_echo_output()
         echo '搜索"'.l:query.'"出错, 请稍后再试:('
@@ -201,24 +221,43 @@ function! GscWxRand(num)
             let l:annotation = item['annotation']
             let l:appreciation = item['appreciation']
             let l:master_comment = item['master_comment']
+            if g:gsc_highlight
+                let l:title = nr2char(2).l:title.nr2char(2)
+                let l:content = nr2char(1).join(split(l:content, "\n"), "\n".nr2char(1))
+            endif
             let l:ll = [l:title, l:dynasty.l:author, l:content."\n"]
             if g:gsc_wx_show_audio && l:audio_id > 0
                 let l:ll = add(l:ll, 'https://songci.nos-eastchina1.126.net/audio/'.l:audio_id.'.m4a'."\n")
             endif
             if g:gsc_wx_show_intro && len(l:intro) > 0
-                let l:ll = add(l:ll, "评析：\n".l:intro."\n")
+                if g:gsc_highlight
+                    let l:intro = nr2char(3).join(split(l:intro, "\n"), "\n".nr2char(3))
+                endif
+                let l:ll = add(l:ll, nr2char(1)."评析：".nr2char(1)."\n".l:intro."\n")
             endif
             if g:gsc_wx_show_annotation && len(l:annotation) > 0
-                let l:ll = add(l:ll, "注释：\n".l:annotation."\n")
+                if g:gsc_highlight
+                    let l:annotation = nr2char(4).join(split(l:annotation, "\n"), "\n".nr2char(4))
+                endif
+                let l:ll = add(l:ll, nr2char(1)."注释：".nr2char(1)."\n".l:annotation."\n")
             endif
             if g:gsc_wx_show_translation && len(l:translation) > 0
-                let l:ll = add(l:ll, "译文：\n".l:translation."\n")
+                if g:gsc_highlight
+                    let l:translation = nr2char(5).join(split(l:translation, "\n"), "\n".nr2char(5))
+                endif
+                let l:ll = add(l:ll, nr2char(1)."译文：".nr2char(1)."\n".l:translation."\n")
             endif
             if g:gsc_wx_show_appreciation && len(l:appreciation) > 0
-                let l:ll = add(l:ll, "赏析：\n".l:appreciation."\n")
+                if g:gsc_highlight
+                    let l:appreciation = nr2char(6).join(split(l:appreciation, "\n"), "\n".nr2char(6))
+                endif
+                let l:ll = add(l:ll, nr2char(1)."赏析：".nr2char(1)."\n".l:appreciation."\n")
             endif
             if g:gsc_wx_show_master_comment && len(l:master_comment) > 0
-                let l:ll = add(l:ll, "辑评：\n".l:master_comment."\n")
+                if g:gsc_highlight
+                    let l:master_comment = nr2char(7).join(split(l:master_comment, "\n"), "\n".nr2char(7))
+                endif
+                let l:ll = add(l:ll, nr2char(1)."辑评：".nr2char(1)."\n".l:master_comment."\n")
             endif
             let l:buf = l:buf.join(l:ll, "\n")."\n"
         endfor
@@ -228,6 +267,7 @@ function! GscWxRand(num)
         call gsc#clear_echo_output()
         echo '共获取'.l:num.'条结果，用时 '.reltimestr(reltime(l:start_time)).'s'
         normal ggdd
+        setlocal filetype=gsc
     catch
         call gsc#clear_echo_output()
         echo '出错, 请稍后再试:('

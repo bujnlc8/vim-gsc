@@ -30,6 +30,10 @@ if !exists('g:gsc_cache')
     let g:gsc_cache = 1
 endif
 
+if !exists('g:gsc_highlight')
+    let g:gsc_highlight = 1
+endif
+
 if !exists('g:gsc_cache_path')
     let g:gsc_cache_path = expand('<sfile>:p:h').'/cache'
 endif
@@ -77,11 +81,17 @@ function! GscAppend(query)
                 let l:author = item['work']['authorName']
                 let l:dynasty = '['.item['work']['dynasty'].'] '
                 let l:object_id = item['work']['objectId']
+                let l:url = 'http://lib.xcz.im/work/'.l:object_id
                 let l:content = substitute(item['work']['content'], '\r', '', 'g')
+                let l:author = l:dynasty.l:author
+                if g:gsc_highlight
+                    let l:title = nr2char(2).l:title.nr2char(2)
+                    let l:content = nr2char(1).join(split(l:content, "\n"), "\n".nr2char(1))
+                endif
                 if g:gsc_show_url
-                    let l:buf = l:buf.(join([l:title, l:dynasty.l:author, l:content."\n", 'http://lib.xcz.im/work/'.l:object_id."\n"], "\n"))."\n"
+                    let l:buf = l:buf.(join([l:title, l:author, l:content."\n", l:url."\n"], "\n"))."\n"
                 else
-                    let l:buf = l:buf.(join([l:title, l:dynasty.l:author, l:content."\n"], "\n"))."\n"
+                    let l:buf = l:buf.(join([l:title, l:dynasty, l:content."\n"], "\n"))."\n"
                 endif
             endfor
             let l:buf = l:buf.'GgGg'.len(l:json_res['result'])
@@ -100,6 +110,7 @@ function! GscAppend(query)
         normal! dd
         echo '搜索"'.l:query.'"，共'.(l:total_num + 0).'条相关结果，用时'.reltimestr(reltime(l:start_time)).'s'
         normal gg
+        setlocal filetype=gsc
     catch
         call gsc#clear_echo_output()
         echo '搜索"'.l:query.'"出错, 请稍后再试:('
@@ -132,6 +143,9 @@ function! GscSearchSelect()
     endif
 endfunction
 
+au Filetype gsc set isprint=@,161-255,1-7
+au BufWinEnter,Filetype gsc match  Conceal /[\u0001\u0002\u0003\u0004\u0005\u0006\u0007]/
+au BufNewFile,BufRead *.gsc set filetype=gsc
 command! -nargs=+  GscAppend call GscAppend(<q-args>)
 command! -nargs=+ Gsc call Gsc(<q-args>)
 command! -nargs=?  GscClearCache call GscClearCache(<q-args>)
