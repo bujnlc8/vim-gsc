@@ -24,10 +24,10 @@ endfunction
 function! gsc#md5(s)
     try
         if executable('md5')
-            return matchstr(system('echo '.a:s.' | md5'), '[a-z 0-9]*')
+            return matchstr(system('echo "'.a:s.'" | md5'), '[a-z 0-9]*')
         endif
         if executable('base64')
-            return tolower(matchstr(system('echo '.a:s.' | base64'), '[a-z 0-9 A-Z]*'))
+            return tolower(matchstr(system('echo "'.a:s.'" | base64'), '[a-z 0-9 A-Z]*'))
         endif
     catch
         return a:s

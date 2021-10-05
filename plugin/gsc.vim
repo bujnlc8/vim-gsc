@@ -277,7 +277,7 @@ function! s:process_item(work_id, work_type)
                         \}
             if g:gsc_cache
                 try
-                    let l:buf = gsc#json_encode(l:res)
+                    let l:buf = gsc#json_encode(string(l:res))
                     let l:buf = substitute(l:buf, "'", "‘", 'g')
                     call system("echo '".l:buf."' | ".g:gsc_cache_comp_algo." --best > ".l:cache_path)
                 catch
@@ -451,7 +451,7 @@ function! s:render_by_page(author_id, page, page_size, author_name)
                     \}
         if g:gsc_cache && !filereadable(l:cache_path)
             try
-                call system("echo '".substitute(gsc#json_encode(l:item), "'", "‘", 'g')."' | ".g:gsc_cache_comp_algo." --best > ".l:cache_path)
+                call system("echo '".substitute(gsc#json_encode(string(l:item)), "'", "‘", 'g')."' | ".g:gsc_cache_comp_algo." --best > ".l:cache_path)
             catch
                 call delete(l:cache_path)
             endtry
