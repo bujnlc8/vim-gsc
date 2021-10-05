@@ -551,7 +551,7 @@ endfunction
 function! GscCollectionWorks(collection_name, ...)
     let l:collection_name = a:collection_name
     if !has_key(g:collection#map, l:collection_name)
-        echo '找不到合集 '.a:collection_name, ':GscCollectionList 查看合集列表'
+        echo '找不到合集 '.a:collection_name.':GscCollectionList 查看合集列表'
         return
     endif
     let l:collection_id = g:collection#map[l:collection_name]
