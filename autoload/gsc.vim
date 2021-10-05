@@ -190,7 +190,7 @@ function! gsc#process_item(item, num_serial, work_type)
     return l:ll
 endfunction
 
-function gsc#string_is_empty(s)
+function! gsc#string_is_empty(s)
     if a:s == v:null || a:s == v:none
         return v:true
     endif

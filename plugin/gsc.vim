@@ -306,11 +306,15 @@ function! s:process_item(work_id, work_type)
 endfunction
 
 function! GscCollectList(num)
-    if a:num
+    let l:filter_str = ''
+    if len(a:num) > 0
         let l:num = a:num + 0
-        if l:num <= 0
+        if l:num < 0
             echo '请输入正确的数量'
             return
+        else
+            let l:filter_str = a:num
+            let l:num = 100000
         endif
     else
         let l:num = 100000
@@ -326,10 +330,21 @@ function! GscCollectList(num)
             let l:num_serial = l:num_serial + 1
             let l:tmp = split(x, ':')[0]
             let l:ll = s:process_item(l:tmp[1:], l:tmp[0])
-            let l:buf = l:buf.join(gsc#process_item(l:ll, l:num_serial, x[0]), "\n")."\n"
+            let l:tmp = join(gsc#process_item(l:ll, l:num_serial, x[0]), "\n")
+            if len(l:filter_str) > 0
+                if match(l:tmp, l:filter_str) == -1
+                    let l:num_serial = l:num_serial - 1
+                    continue
+                endif
+            endif
+            let l:buf = l:buf.l:tmp."\n"
         endfor
         if len(l:buf) == 0
-            echo '当前没有收藏，你可以执行 :GscCollect `$title$author$content[:2]来添加!'
+            if len(l:filter_str) > 0
+                echo '未根据 '.l:filter_str.' 筛选出结果, 你可以执行 :GscCollect `$title$author$content[:2]来添加!'
+            else
+                echo '当前没有收藏，你可以执行 :GscCollect `$title$author$content[:2]来添加!'
+            endif
             return
         endif
         call gsc#clear()
@@ -539,7 +554,7 @@ function! GscQuotes(...)
     echo '总共获取'.l:total_num.'条记录，用时'.reltimestr(reltime(l:start_time)).'s'
 endfunction
 
-function GscCollectEdit()
+function! GscCollectEdit()
     execute 'tabnew '.g:gsc_collect_path
 endfunction
 
