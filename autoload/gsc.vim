@@ -110,6 +110,17 @@ function! gsc#process_item(item, num_serial, work_type)
     let l:map_file = g:gsc_map_cache.'/'.a:work_type.l:title_md5[:1]
     if !filereadable(l:map_file)
         call writefile([l:title_md5.':'.item['id']], l:map_file, 'a')
+    else
+        let l:need_write = 1
+        for x in readfile(l:map_file)
+            if match(x, l:title_md5) != -1
+                let l:need_write = 0
+                break
+            endif
+        endfor
+        if l:need_write
+            call writefile([l:title_md5.':'.item['id']], l:map_file, 'a')
+        endif
     endif
     if g:gsc_wx_show_item_serial
         let l:title = a:num_serial.'.'.l:title
