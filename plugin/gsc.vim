@@ -539,6 +539,10 @@ function! GscQuotes(...)
     echo '总共获取'.l:total_num.'条记录，用时'.reltimestr(reltime(l:start_time)).'s'
 endfunction
 
+function GscCollectEdit()
+    execute 'tabnew '.g:gsc_collect_path
+endfunction
+
 au Filetype gsc set isprint=@,161-255,1-7
 au BufWinEnter,Filetype gsc match  Conceal /[\u0001\u0002\u0003\u0004\u0005\u0006\u0007]/
 au BufNewFile,BufRead *.gsc set filetype=gsc
@@ -550,3 +554,4 @@ command! -nargs=? GscCollectList call GscCollectList(<q-args>)
 command! -narg=+ GscAuthorInfo call GscAuthorInfo(<q-args>)
 command! -nargs=+  GscAuthorWorks call GscAuthorWorks(<f-args>)
 command! -nargs=*  GscQuotes call GscQuotes(<f-args>)
+command! -nargs=?  GscCollectEdit call GscCollectEdit()
