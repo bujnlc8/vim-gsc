@@ -39,8 +39,6 @@ let s:curl_by_id = 'curl -s "https://avoscloud.com/1.1/call/getWorkById"
             \ --data "{\"workId\":\"WORK_ID\"}"'
 
 
-let s:curl_get_by_id_wx = 'curl -s https://igsc.wx.haihui.site/songci/index/WORK_ID/vim -H "User-Agent:vim-plugin"'
-
 let s:curl_get_author = 'curl -s "https://avoscloud.com/1.1/call/getAuthorById2"
             \ -H "authority: avoscloud.com"
             \ -H "x-lc-ua: LeanCloud-JS-SDK/3.15.0 (Browser)"
@@ -102,6 +100,29 @@ let s:curl_get_quotes = 'curl -s "https://avoscloud.com/1.1/call/getQuotesInclud
             \ -H "accept-language: zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"
             \ --data "{\"authorId\": \"AUTHOR_ID\",\"kind\":null,\"dynasty\":null,\"collectionId\":null,\"page\":_PAGE,\"perPage\":_PERPAGE}"'
 
+
+let s:curl_get_collections = 'curl -s "https://avoscloud.com/1.1/call/getWorksByCollection"
+            \ -H "authority: avoscloud.com"
+            \ -H "x-lc-ua: LeanCloud-JS-SDK/3.15.0 (Browser)"
+            \ -H "dnt: 1"
+            \ -H "sec-ch-ua-mobile: ?0"
+            \ -H "user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36"
+            \ -H "content-type: application/json;charset=UTF-8"
+            \ -H "x-lc-sign: 8e33bfbb3625e1b6a261487dc7f38dca,1633015485114"
+            \ -H "x-lc-session: saxj96gey4hqsy7wxp4zrnywp"
+            \ -H "x-lc-id: 9pq709je4y36ubi10xphdpovula77enqrz27idozgry7x644"
+            \ -H "x-lc-prod: 1"
+            \ -H "accept: */*"
+            \ -H "origin: http://lib.xcz.im"
+            \ -H "sec-fetch-site: cross-site"
+            \ -H "sec-fetch-mode: cors"
+            \ -H "sec-fetch-dest: empty"
+            \ -H "referer: http://lib.xcz.im/"
+            \ -H "accept-language: zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"
+            \ --data "{\"collectionId\":\"COLLECTION_ID\", \"page\": _PAGE, \"perPage\": _PERPAGE}"'
+
+
+let s:curl_get_by_id_wx = 'curl -s https://igsc.wx.haihui.site/songci/index/WORK_ID/vim -H "User-Agent:vim-plugin"'
 
 if !exists('g:gsc_show_url')
     let g:gsc_show_url = 0
@@ -175,7 +196,6 @@ function! GscAppend(query)
         let l:buf = l:buf.'GgGg'.len(l:json_res['result'])
         if g:gsc_cache
             try
-                let l:buf = substitute(l:buf, "'", "‘", 'g')
                 call system("echo '".l:buf."' | ".g:gsc_cache_comp_algo." --best > ".l:cache_path)
             catch
                 call delete(l:cache_path)
@@ -248,7 +268,7 @@ function! s:process_item(work_id, work_type)
     let l:work_md5 = gsc#md5(a:work_type.a:work_id)
     if a:work_type == '#'
         let l:cache_path = g:gsc_cache_path.'/'.l:work_md5.'.xcz.'.g:gsc_cache_comp_algo[0:1].'.cache'
-        let res = ''
+        let l:res = ''
         if g:gsc_cache
             if filereadable(l:cache_path)
                 try
@@ -277,8 +297,7 @@ function! s:process_item(work_id, work_type)
                         \}
             if g:gsc_cache
                 try
-                    let l:buf = gsc#json_encode(string(l:res))
-                    let l:buf = substitute(l:buf, "'", "‘", 'g')
+                    let l:buf = gsc#json_encode(l:res)
                     call system("echo '".l:buf."' | ".g:gsc_cache_comp_algo." --best > ".l:cache_path)
                 catch
                     call delete(l:cache_path)
@@ -304,7 +323,6 @@ function! s:process_item(work_id, work_type)
             let l:res = system(substitute(s:curl_get_by_id_wx, 'WORK_ID', a:work_id, 'g'))
             if g:gsc_wx_cache
                 try
-                    let l:buf = substitute(l:res, "'", "‘", 'g')
                     call system("echo '".l:buf."' | ".g:gsc_cache_comp_algo." --best > ".l:cache_path)
                 catch
                     call delete(l:cache_path)
@@ -451,7 +469,7 @@ function! s:render_by_page(author_id, page, page_size, author_name)
                     \}
         if g:gsc_cache && !filereadable(l:cache_path)
             try
-                call system("echo '".substitute(gsc#json_encode(string(l:item)), "'", "‘", 'g')."' | ".g:gsc_cache_comp_algo." --best > ".l:cache_path)
+                call system("echo '".gsc#json_encode(l:item)."' | ".g:gsc_cache_comp_algo." --best > ".l:cache_path)
             catch
                 call delete(l:cache_path)
             endtry
@@ -530,6 +548,53 @@ function! GscAuthorWorks(author_name, ...)
 endfunction
 
 
+function! GscCollectionWorks(collection_name, ...)
+    let l:collection_name = a:collection_name
+    if !has_key(g:collection#map, l:collection_name)
+        echo '找不到合集 '.a:collection_name, ':GscCollectionList 查看合集列表'
+        return
+    endif
+    let l:collection_id = g:collection#map[l:collection_name]
+    let l:page = 1
+    let l:page_size = 20
+    if len(a:000) >= 2
+        let l:page = a:000[0] + 0
+        let l:page_size = a:000[1] + 0
+    endif
+    if len(a:000) >= 1
+        let l:page = a:000[0] + 0
+    endif
+    let l:start_time = reltime()
+    call gsc#clear()
+    let l:total_num = 0
+    for page in range(l:page)
+        let l:total_num = l:total_num + s:render_collection_by_page(l:collection_id, page + 1, l:page_size, l:collection_name)
+    endfor
+    echo '总共获取'.l:total_num.'条记录，用时'.reltimestr(reltime(l:start_time)).'s'
+endfunction
+
+function! s:render_collection_by_page(collection_id, page, page_size, collection_name)
+    let l:curl = substitute(s:curl_get_collections, 'COLLECTION_ID', a:collection_id, '')
+    let l:curl = substitute(l:curl, '_PAGE', a:page, '')
+    let l:curl = substitute(l:curl, '_PERPAGE', a:page_size, '')
+    echo '正在获取合集'.a:collection_name.'第'.a:page.'页作品🔥 ...'
+    let l:res = gsc#json_decode(system(l:curl))['result']
+    let l:buf = ''
+    let l:num_serial  = (a:page - 1) * a:page_size
+    for item in l:res
+        let l:num_serial = l:num_serial + 1
+        let l:ll = gsc#process_item(s:process_item(item['objectId'], '#'), l:num_serial, '#')
+        let l:buf = l:buf.join(l:ll, "\n")."\n"
+    endfor
+    call gsc#write_to_buffer(l:buf)
+    if a:page == 1
+        normal! ggdd
+    endif
+    call gsc#clear_echo_output()
+    setlocal ft=gsc
+    return len(l:res)
+endfunction
+
 function! GscQuotes(...)
     let l:author_name = ''
     let l:page = 1
@@ -579,6 +644,27 @@ function! GscCollectEdit()
     execute 'tabnew '.g:gsc_collect_path
 endfunction
 
+function! GscCollectionList(arg)
+    if len(a:arg) > 0
+        if !has_key(g:collection#map, a:arg)
+            echo '找不到合集 '.a:arg
+        else
+            echo '合集 '.a:arg.' 存在'
+        endif
+        return
+    endif
+    let l:buf = ''
+    for key in sort(keys(g:collection#map))
+        let l:buf = l:buf .nr2char(4).key..nr2char(4)."\n"
+    endfor
+    call gsc#clear()
+    call gsc#write_to_buffer(l:buf)
+    call gsc#clear_echo_output()
+    normal ggdd
+    setlocal ft=gsc
+endfunction
+
+
 au Filetype gsc set isprint=@,161-255,1-7
 au BufWinEnter,Filetype gsc match  Conceal /[\u0001\u0002\u0003\u0004\u0005\u0006\u0007]/
 au BufNewFile,BufRead *.gsc set filetype=gsc
@@ -591,3 +677,5 @@ command! -narg=+ GscAuthorInfo call GscAuthorInfo(<q-args>)
 command! -nargs=+  GscAuthorWorks call GscAuthorWorks(<f-args>)
 command! -nargs=*  GscQuotes call GscQuotes(<f-args>)
 command! -nargs=?  GscCollectEdit call GscCollectEdit()
+command! -nargs=+  GscCollectionWorks call GscCollectionWorks(<f-args>)
+command! -nargs=? GscCollectionList call GscCollectionList(<q-args>)

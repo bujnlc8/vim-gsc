@@ -70,7 +70,7 @@ endfunction
 
 
 function! gsc#json_encode(s)
-    let @b = a:s
+    let @b = string(a:s)
     if exists('*json_encode')
         return json_encode(a:s)
     endif
@@ -150,7 +150,10 @@ function! gsc#process_item(item, num_serial, work_type)
             endif
         endif
     endif
-    if g:gsc_wx_show_item_serial
+    if a:work_type =='@' && g:gsc_wx_show_item_serial
+        let l:title = a:num_serial.'.'.l:title
+    endif
+    if a:work_type =='#' && g:gsc_show_item_serial
         let l:title = a:num_serial.'.'.l:title
     endif
     if g:gsc_highlight

@@ -102,7 +102,6 @@ function! GscWxAppend(query)
         let l:buf = l:buf.'GgGg'.len(l:json_res['data']['data'])
         if g:gsc_wx_cache
             try
-                let l:buf = substitute(l:buf, "'", "‘", 'g')
                 call system("echo '".l:buf."' | ".g:gsc_cache_comp_algo.'  > '.l:comp_cache_path)
             catch
                 call delete(l:comp_cache_path)
