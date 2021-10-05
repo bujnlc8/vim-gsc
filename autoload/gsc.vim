@@ -129,18 +129,25 @@ function! gsc#process_item(item, num_serial, work_type)
     let l:master_comment = substitute(item['master_comment'], '\r', '', 'g')
     let l:title_md5 = gsc#md5(substitute(l:title.l:author.l:content[:5], '\s', '', 'g'))
     let l:map_file = g:gsc_map_cache.'/'.a:work_type.l:title_md5[:1]
-    if !filereadable(l:map_file)
+    if !isdirectory(l:map_file)
+        call mkdir(l:map_file)
+        let l:map_file = l:map_file.'/'.l:title_md5[2:3]
         call writefile([l:title_md5.':'.item['id']], l:map_file, 'a')
     else
         let l:need_write = 1
-        for x in readfile(l:map_file)
-            if match(x, l:title_md5) != -1
-                let l:need_write = 0
-                break
-            endif
-        endfor
-        if l:need_write
+        let l:map_file = l:map_file.'/'.l:title_md5[2:3]
+        if !filereadable(l:map_file)
             call writefile([l:title_md5.':'.item['id']], l:map_file, 'a')
+        else
+            for x in readfile(l:map_file)
+                if match(x, l:title_md5) != -1
+                    let l:need_write = 0
+                    break
+                endif
+            endfor
+            if l:need_write
+                call writefile([l:title_md5.':'.item['id']], l:map_file, 'a')
+            endif
         endif
     endif
     if g:gsc_wx_show_item_serial

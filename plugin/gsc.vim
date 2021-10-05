@@ -196,9 +196,21 @@ function! GscCollect(words)
     let l:words_md5 = gsc#md5(l:words)
     let l:prefix = '@'
     let l:map_file = g:gsc_map_cache.'/'.l:prefix.l:words_md5[:1]
-    if !filereadable(l:map_file)
+    if !isdirectory(l:map_file)
         let l:prefix = '#'
         let l:map_file = g:gsc_map_cache.'/'.l:prefix.l:words_md5[:1]
+        if !isdirectory(l:map_file)
+            echo '找不到id'
+            return
+        else
+            let l:map_file = l:map_file.'/'.l:words_md5[2:3]
+            if !filereadable(l:map_file)
+                echo '找不到id'
+                return
+            endif
+        endif
+    else
+        let l:map_file = l:map_file.'/'.l:words_md5[2:3]
         if !filereadable(l:map_file)
             echo '找不到id'
             return
@@ -253,7 +265,7 @@ function! s:process_item(work_id, work_type)
             let l:res = {
                         \'id': a:work_id,
                         \'work_title': l:result['title'],
-                        \ 'content': l:result['content'],
+                        \'content': l:result['content'],
                         \'audio_id': 0,
                         \'work_author': l:result['authorName'],
                         \'work_dynasty': l:result['dynasty'],
@@ -422,10 +434,12 @@ function! s:render_by_page(author_id, page, page_size, author_name)
     let l:num_serial  = (a:page - 1) * a:page_size
     for item in l:res
         let l:num_serial = l:num_serial + 1
+        let l:work_md5 = gsc#md5('#'.item['objectId'])
+        let l:cache_path = g:gsc_cache_path.'/'.l:work_md5.'.xcz.'.g:gsc_cache_comp_algo[0:1].'.cache'
         let l:item = {
                     \'id': item['objectId'],
                     \'work_title': item['title'],
-                    \ 'content': item['content'],
+                    \'content': item['content'],
                     \'audio_id': 0,
                     \'work_author': item['authorName'],
                     \'work_dynasty': item['dynasty'],
@@ -435,6 +449,13 @@ function! s:render_by_page(author_id, page, page_size, author_name)
                     \'appreciation': item['appreciation'],
                     \'master_comment': item['masterComment'],
                     \}
+        if g:gsc_cache && !filereadable(l:cache_path)
+            try
+                call system("echo '".substitute(gsc#json_encode(l:item), "'", "‘", 'g')."' | ".g:gsc_cache_comp_algo." --best > ".l:cache_path)
+            catch
+                call delete(l:cache_path)
+            endtry
+        endif
         let l:buf = l:buf.join(gsc#process_item(l:item, l:num_serial, '#'), "\n")."\n"
     endfor
     call gsc#write_to_buffer(l:buf)
