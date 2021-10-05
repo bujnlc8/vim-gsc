@@ -312,7 +312,7 @@ function! GscCollectList(num)
         if l:num < 0
             echo '请输入正确的数量'
             return
-        else
+        elseif l:num == 0
             let l:filter_str = a:num
             let l:num = 100000
         endif
