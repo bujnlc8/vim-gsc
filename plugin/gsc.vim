@@ -82,6 +82,26 @@ let s:curl_get_works_by_author = 'curl -s "https://avoscloud.com/1.1/call/getWor
             \ -H "accept-language: zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"
             \ --data "{\"authorId\":\"AUTHOR_ID\", \"page\": _PAGE, \"perPage\": _PERPAGE}"'
 
+let s:curl_get_quotes = 'curl -s "https://avoscloud.com/1.1/call/getQuotesIncludeCount"
+            \ -H "authority: avoscloud.com"
+            \ -H "x-lc-ua: LeanCloud-JS-SDK/3.15.0 (Browser)"
+            \ -H "dnt: 1"
+            \ -H "sec-ch-ua-mobile: ?0"
+            \ -H "user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36"
+            \ -H "content-type: application/json;charset=UTF-8"
+            \ -H "x-lc-sign: 8e33bfbb3625e1b6a261487dc7f38dca,1633015485114"
+            \ -H "x-lc-session: saxj96gey4hqsy7wxp4zrnywp"
+            \ -H "x-lc-id: 9pq709je4y36ubi10xphdpovula77enqrz27idozgry7x644"
+            \ -H "x-lc-prod: 1"
+            \ -H "accept: */*"
+            \ -H "origin: http://lib.xcz.im"
+            \ -H "sec-fetch-site: cross-site"
+            \ -H "sec-fetch-mode: cors"
+            \ -H "sec-fetch-dest: empty"
+            \ -H "referer: http://lib.xcz.im/"
+            \ -H "accept-language: zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"
+            \ --data "{\"authorId\": \"AUTHOR_ID\",\"kind\":null,\"dynasty\":null,\"collectionId\":null,\"page\":_PAGE,\"perPage\":_PERPAGE}"'
+
 
 if !exists('g:gsc_show_url')
     let g:gsc_show_url = 0
@@ -411,6 +431,27 @@ function! s:render_by_page(author_id, page, page_size, author_name)
     return len(l:res)
 endfunction
 
+function! s:render_quote_by_page(author_id, page, page_size, author_name)
+    let l:curl = substitute(s:curl_get_quotes, 'AUTHOR_ID', a:author_id, '')
+    let l:curl = substitute(l:curl, '_PAGE', a:page, '')
+    let l:curl = substitute(l:curl, '_PERPAGE', a:page_size, '')
+    echo '正在获取'.a:author_name.'第'.a:page.'页名句🔥 ...'
+    let l:res = gsc#json_decode(system(l:curl))['result']['quotes']
+    let l:buf = ''
+    let l:num_serial  = (a:page - 1) * a:page_size
+    for item in l:res
+        let l:num_serial = l:num_serial + 1
+        let l:buf = l:buf.nr2char(1).l:num_serial.item['quote'].nr2char(1)."\n".nr2char(4).'---'.item['dynasty'].'·'.item['authorName'].'  《'.item['work']['title'].'》'.nr2char(4)."\n\n"
+    endfor
+    call gsc#write_to_buffer(l:buf)
+    if a:page == 1
+        normal! ggdd
+    endif
+    call gsc#clear_echo_output()
+    setlocal ft=gsc
+    return len(l:res)
+endfunction
+
 function! GscAuthorWorks(author_name, ...)
     let l:author_name = a:author_name
     if !has_key(g:author#map, l:author_name)
@@ -437,6 +478,37 @@ function! GscAuthorWorks(author_name, ...)
 endfunction
 
 
+function! GscQuotes(...)
+    let l:author_name = ''
+    let l:page = 1
+    let l:page_size = 10
+    if len(a:000) >= 3
+        let l:page = a:000[0] + 0
+        let l:page_size = a:000[1] + 0
+        let l:author_name = a:000[2]
+    elseif len(a:000) >= 2
+        let l:page = a:000[0] + 0
+        let l:page_size = a:000[1] + 0
+    elseif len(a:000) >= 1
+        let l:page = a:000[0] + 0
+    endif
+    let l:author_id = ''
+    if len(l:author_name) >0
+        if !has_key(g:author#map, l:author_name)
+            echo '找不到作者 '.l:author_name
+            return
+        else
+            let l:author_id = g:author#map[l:author_name]
+        endif
+    endif
+    let l:start_time = reltime()
+    call gsc#clear()
+    let l:total_num = 0
+    for page in range(l:page)
+        let l:total_num = l:total_num + s:render_quote_by_page(l:author_id, page + 1, l:page_size, l:author_name)
+    endfor
+    echo '总共获取'.l:total_num.'条记录，用时'.reltimestr(reltime(l:start_time)).'s'
+endfunction
 
 au Filetype gsc set isprint=@,161-255,1-7
 au BufWinEnter,Filetype gsc match  Conceal /[\u0001\u0002\u0003\u0004\u0005\u0006\u0007]/
@@ -448,3 +520,4 @@ command! -nargs=+ GscCollect call GscCollect(<q-args>)
 command! -nargs=? GscCollectList call GscCollectList(<q-args>)
 command! -narg=+ GscAuthorInfo call GscAuthorInfo(<q-args>)
 command! -nargs=+  GscAuthorWorks call GscAuthorWorks(<f-args>)
+command! -nargs=*  GscQuotes call GscQuotes(<f-args>)
