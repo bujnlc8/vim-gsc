@@ -433,18 +433,34 @@ endfunction
 
 function! s:render_quote_by_page(author_id, page, page_size, author_name)
     let l:curl = substitute(s:curl_get_quotes, 'AUTHOR_ID', a:author_id, '')
-    let l:curl = substitute(l:curl, '_PAGE', a:page, '')
+    let l:curl = substitute(l:curl, '_PAGE', abs(a:page), '')
     let l:curl = substitute(l:curl, '_PERPAGE', a:page_size, '')
-    echo '正在获取'.a:author_name.'第'.a:page.'页名句🔥 ...'
+    echo '正在获取'.a:author_name.'第'.abs(a:page).'页名句🔥 ...'
     let l:res = gsc#json_decode(system(l:curl))['result']['quotes']
     let l:buf = ''
-    let l:num_serial  = (a:page - 1) * a:page_size
+    if a:page <= 0
+        let l:num_serial = 0
+    else
+        let l:num_serial  = (a:page - 1) * a:page_size
+    endif
     for item in l:res
         let l:num_serial = l:num_serial + 1
-        let l:buf = l:buf.nr2char(1).l:num_serial.item['quote'].nr2char(1)."\n".nr2char(4).'---'.item['dynasty'].'·'.item['authorName'].'  《'.item['work']['title'].'》'.nr2char(4)."\n\n"
+        if a:page_size != 1
+            if has_key(item, 'work')
+                let l:buf = l:buf.nr2char(4).l:num_serial.'.'.item['quote'].nr2char(4)."\n".nr2char(1).'---'.item['dynasty'].'·'.item['authorName'].'  《'.item['work']['title'].'》'.nr2char(1)."\n\n"
+            else
+                let l:buf = l:buf.nr2char(4).l:num_serial.'.'.item['quote'].nr2char(4)."\n".nr2char(1).'---'.item['dynasty'].'·'.item['authorName'].nr2char(1)."\n\n"
+            endif
+        else
+            if has_key(item, 'work')
+                let l:buf = l:buf.nr2char(4).item['quote'].nr2char(4)."\n".nr2char(1).'---'.item['dynasty'].'·'.item['authorName'].'  《'.item['work']['title'].'》'.nr2char(1)."\n\n"
+            else
+                let l:buf = l:buf.nr2char(4).item['quote'].nr2char(4)."\n".nr2char(1).'---'.item['dynasty'].'·'.item['authorName'].nr2char(1)."\n\n"
+            endif
+        endif
     endfor
     call gsc#write_to_buffer(l:buf)
-    if a:page == 1
+    if a:page == 1 || a:page <= 0
         normal! ggdd
     endif
     call gsc#clear_echo_output()
@@ -481,7 +497,7 @@ endfunction
 function! GscQuotes(...)
     let l:author_name = ''
     let l:page = 1
-    let l:page_size = 10
+    let l:page_size = 20
     if len(a:000) >= 3
         let l:page = a:000[0] + 0
         let l:page_size = a:000[1] + 0
@@ -504,9 +520,22 @@ function! GscQuotes(...)
     let l:start_time = reltime()
     call gsc#clear()
     let l:total_num = 0
-    for page in range(l:page)
-        let l:total_num = l:total_num + s:render_quote_by_page(l:author_id, page + 1, l:page_size, l:author_name)
-    endfor
+    if l:page != -1
+        for page in range(l:page)
+            let l:total_num = l:total_num + s:render_quote_by_page(l:author_id, page + 1, l:page_size, l:author_name)
+        endfor
+    else
+        if len(l:author_name) > 0
+            let l:num = 50
+        else
+            let l:num = 4200
+        endif
+        let l:page = -float2nr(l:num / l:page_size * gsc#random())
+        if l:page == 0
+            let l:page = 1
+        endif
+        let l:total_num = l:total_num + s:render_quote_by_page(l:author_id, l:page, l:page_size, l:author_name)
+    endif
     echo '总共获取'.l:total_num.'条记录，用时'.reltimestr(reltime(l:start_time)).'s'
 endfunction
 
