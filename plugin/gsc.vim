@@ -41,6 +41,27 @@ let s:curl_by_id = 'curl -s "https://avoscloud.com/1.1/call/getWorkById"
 
 let s:curl_get_by_id_wx = 'curl -s https://igsc.wx.haihui.site/songci/index/WORK_ID/vim -H "User-Agent:vim-plugin"'
 
+let s:curl_get_author = 'curl -s "https://avoscloud.com/1.1/call/getAuthorById2"
+            \ -H "authority: avoscloud.com"
+            \ -H "x-lc-ua: LeanCloud-JS-SDK/3.15.0 (Browser)"
+            \ -H "dnt: 1"
+            \ -H "sec-ch-ua-mobile: ?0"
+            \ -H "user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36"
+            \ -H "content-type: application/json;charset=UTF-8"
+            \ -H "x-lc-sign: 8e33bfbb3625e1b6a261487dc7f38dca,1633015485114"
+            \ -H "x-lc-session: saxj96gey4hqsy7wxp4zrnywp"
+            \ -H "x-lc-id: 9pq709je4y36ubi10xphdpovula77enqrz27idozgry7x644"
+            \ -H "x-lc-prod: 1"
+            \ -H "accept: */*"
+            \ -H "origin: http://lib.xcz.im"
+            \ -H "sec-fetch-site: cross-site"
+            \ -H "sec-fetch-mode: cors"
+            \ -H "sec-fetch-dest: empty"
+            \ -H "referer: http://lib.xcz.im/"
+            \ -H "accept-language: zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"
+            \ --data "{\"authorId\":\"AUTHOR_ID\"}"'
+
+
 if !exists('g:gsc_show_url')
     let g:gsc_show_url = 0
 endif
@@ -314,6 +335,25 @@ function! GscSearchSelect(work_type)
     endif
 endfunction
 
+function! GscAuthorInfo(author_name)
+    let l:author_name = substitute(a:author_name, '\s', '', 'g')
+    if !has_key(g:author#map, l:author_name)
+        echo '找不到作者 '.a:author_name
+        return
+    endif
+    let l:curl = substitute(s:curl_get_author, 'AUTHOR_ID', g:author#map[author_name], '')
+    let l:res = gsc#json_decode(system(l:curl))['result']
+    let l:name = nr2char(1).l:res['name'].nr2char(1).'('.l:res['birthYear'].'~'.l:res['deathYear'].')'
+    let l:desc = nr2char(5).l:res['desc'].nr2char(5)
+    let l:url = l:res['baiduWiki']
+    let l:buf = join([l:name, l:desc, l:url], "\n\n")
+    call gsc#clear()
+    call gsc#write_to_buffer(l:buf)
+    normal ggdd
+    setlocal ft=gsc
+endfunction
+
+
 au Filetype gsc set isprint=@,161-255,1-7
 au BufWinEnter,Filetype gsc match  Conceal /[\u0001\u0002\u0003\u0004\u0005\u0006\u0007]/
 au BufNewFile,BufRead *.gsc set filetype=gsc
@@ -322,3 +362,4 @@ command! -nargs=+ Gsc call Gsc(<q-args>)
 command! -nargs=?  GscClearCache call GscClearCache(<q-args>)
 command! -nargs=+ GscCollect call GscCollect(<q-args>)
 command! -nargs=? GscCollectList call GscCollectList(<q-args>)
+command! -narg=+ GscAuthorInfo call GscAuthorInfo(<q-args>)
