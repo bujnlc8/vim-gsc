@@ -1,128 +1,44 @@
-let s:curl = 'curl -s "https://avoscloud.com/1.1/call/searchWorks2"
-            \ -H "authority: avoscloud.com"
-            \ -H "x-lc-ua: LeanCloud-JS-SDK/3.15.0 (Browser)"
-            \ -H "dnt: 1"
-            \ -H "sec-ch-ua-mobile: ?0"
-            \ -H "user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36"
-            \ -H "content-type: application/json;charset=UTF-8"
-            \ -H "x-lc-sign: 8e33bfbb3625e1b6a261487dc7f38dca,1633015485114"
-            \ -H "x-lc-session: saxj96gey4hqsy7wxp4zrnywp"
-            \ -H "x-lc-id: 9pq709je4y36ubi10xphdpovula77enqrz27idozgry7x644"
-            \ -H "x-lc-prod: 1"
-            \ -H "accept: */*"
-            \ -H "origin: http://lib.xcz.im"
-            \ -H "sec-fetch-site: cross-site"
-            \ -H "sec-fetch-mode: cors"
-            \ -H "sec-fetch-dest: empty"
-            \ -H "referer: http://lib.xcz.im/"
-            \ -H "accept-language: zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"
-            \ --data "{\"q\":\"SEARCH_PLACEHOLDER\"}"'
+let s:curl_option = ' -H "authority: avoscloud.com" -H "x-lc-ua: LeanCloud-JS-SDK/3.15.0 (Browser)" -H "dnt: 1" -H "sec-ch-ua-mobile: ?0" -H "user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36" -H "content-type: application/json;charset=UTF-8" -H "x-lc-sign: 8e33bfbb3625e1b6a261487dc7f38dca,1633015485114" -H "x-lc-session: saxj96gey4hqsy7wxp4zrnywp" -H "x-lc-id: 9pq709je4y36ubi10xphdpovula77enqrz27idozgry7x644" -H "x-lc-prod: 1"  -H "accept: */*"  -H "origin: http://lib.xcz.im" -H "sec-fetch-site: cross-site"  -H "sec-fetch-mode: cors" -H "sec-fetch-dest: empty" -H "referer: http://lib.xcz.im/"  -H "accept-language: zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7" '
 
-let s:curl_by_id = 'curl -s "https://avoscloud.com/1.1/call/getWorkById"
-            \ -H "authority: avoscloud.com"
-            \ -H "x-lc-ua: LeanCloud-JS-SDK/3.15.0 (Browser)"
-            \ -H "dnt: 1"
-            \ -H "sec-ch-ua-mobile: ?0"
-            \ -H "user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36"
-            \ -H "content-type: application/json;charset=UTF-8"
-            \ -H "x-lc-sign: 8e33bfbb3625e1b6a261487dc7f38dca,1633015485114"
-            \ -H "x-lc-session: saxj96gey4hqsy7wxp4zrnywp"
-            \ -H "x-lc-id: 9pq709je4y36ubi10xphdpovula77enqrz27idozgry7x644"
-            \ -H "x-lc-prod: 1"
-            \ -H "accept: */*"
-            \ -H "origin: http://lib.xcz.im"
-            \ -H "sec-fetch-site: cross-site"
-            \ -H "sec-fetch-mode: cors"
-            \ -H "sec-fetch-dest: empty"
-            \ -H "referer: http://lib.xcz.im/"
-            \ -H "accept-language: zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"
-            \ --data "{\"workId\":\"WORK_ID\"}"'
+" 统一搜索
+let s:curl = 'curl -s "https://avoscloud.com/1.1/call/searchWorks2" '.s:curl_option.'--data "{\"q\":\"SEARCH_PLACEHOLDER\"}"'
 
+" 根据work_id搜索
+let s:curl_by_id = 'curl -s "https://avoscloud.com/1.1/call/getWorkById"'.s:curl_option.'--data "{\"workId\":\"WORK_ID\"}"'
 
-let s:curl_get_author = 'curl -s "https://avoscloud.com/1.1/call/getAuthorById2"
-            \ -H "authority: avoscloud.com"
-            \ -H "x-lc-ua: LeanCloud-JS-SDK/3.15.0 (Browser)"
-            \ -H "dnt: 1"
-            \ -H "sec-ch-ua-mobile: ?0"
-            \ -H "user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36"
-            \ -H "content-type: application/json;charset=UTF-8"
-            \ -H "x-lc-sign: 8e33bfbb3625e1b6a261487dc7f38dca,1633015485114"
-            \ -H "x-lc-session: saxj96gey4hqsy7wxp4zrnywp"
-            \ -H "x-lc-id: 9pq709je4y36ubi10xphdpovula77enqrz27idozgry7x644"
-            \ -H "x-lc-prod: 1"
-            \ -H "accept: */*"
-            \ -H "origin: http://lib.xcz.im"
-            \ -H "sec-fetch-site: cross-site"
-            \ -H "sec-fetch-mode: cors"
-            \ -H "sec-fetch-dest: empty"
-            \ -H "referer: http://lib.xcz.im/"
-            \ -H "accept-language: zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"
-            \ --data "{\"authorId\":\"AUTHOR_ID\"}"'
+" 获取作者信息
+let s:curl_get_author = 'curl -s "https://avoscloud.com/1.1/call/getAuthorById2"'.s:curl_option.'--data "{\"authorId\":\"AUTHOR_ID\"}"'
 
+" 根据作者搜索
+let s:curl_get_works_by_author = 'curl -s "https://avoscloud.com/1.1/call/getWorksByAuthor"'.s:curl_option.'--data "{\"authorId\":\"AUTHOR_ID\", \"page\": _PAGE, \"perPage\": _PERPAGE}"'
 
-let s:curl_get_works_by_author = 'curl -s "https://avoscloud.com/1.1/call/getWorksByAuthor"
-            \ -H "authority: avoscloud.com"
-            \ -H "x-lc-ua: LeanCloud-JS-SDK/3.15.0 (Browser)"
-            \ -H "dnt: 1"
-            \ -H "sec-ch-ua-mobile: ?0"
-            \ -H "user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36"
-            \ -H "content-type: application/json;charset=UTF-8"
-            \ -H "x-lc-sign: 8e33bfbb3625e1b6a261487dc7f38dca,1633015485114"
-            \ -H "x-lc-session: saxj96gey4hqsy7wxp4zrnywp"
-            \ -H "x-lc-id: 9pq709je4y36ubi10xphdpovula77enqrz27idozgry7x644"
-            \ -H "x-lc-prod: 1"
-            \ -H "accept: */*"
-            \ -H "origin: http://lib.xcz.im"
-            \ -H "sec-fetch-site: cross-site"
-            \ -H "sec-fetch-mode: cors"
-            \ -H "sec-fetch-dest: empty"
-            \ -H "referer: http://lib.xcz.im/"
-            \ -H "accept-language: zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"
-            \ --data "{\"authorId\":\"AUTHOR_ID\", \"page\": _PAGE, \"perPage\": _PERPAGE}"'
+" 获取名句
+let s:curl_get_quotes = 'curl -s "https://avoscloud.com/1.1/call/getQuotesIncludeCount"'.s:curl_option.'--data "{\"authorId\": \"AUTHOR_ID\",\"kind\":null,\"dynasty\":null,\"collectionId\":null,\"page\":_PAGE,\"perPage\":_PERPAGE}"'
 
-let s:curl_get_quotes = 'curl -s "https://avoscloud.com/1.1/call/getQuotesIncludeCount"
-            \ -H "authority: avoscloud.com"
-            \ -H "x-lc-ua: LeanCloud-JS-SDK/3.15.0 (Browser)"
-            \ -H "dnt: 1"
-            \ -H "sec-ch-ua-mobile: ?0"
-            \ -H "user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36"
-            \ -H "content-type: application/json;charset=UTF-8"
-            \ -H "x-lc-sign: 8e33bfbb3625e1b6a261487dc7f38dca,1633015485114"
-            \ -H "x-lc-session: saxj96gey4hqsy7wxp4zrnywp"
-            \ -H "x-lc-id: 9pq709je4y36ubi10xphdpovula77enqrz27idozgry7x644"
-            \ -H "x-lc-prod: 1"
-            \ -H "accept: */*"
-            \ -H "origin: http://lib.xcz.im"
-            \ -H "sec-fetch-site: cross-site"
-            \ -H "sec-fetch-mode: cors"
-            \ -H "sec-fetch-dest: empty"
-            \ -H "referer: http://lib.xcz.im/"
-            \ -H "accept-language: zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"
-            \ --data "{\"authorId\": \"AUTHOR_ID\",\"kind\":null,\"dynasty\":null,\"collectionId\":null,\"page\":_PAGE,\"perPage\":_PERPAGE}"'
+" 获取合集
+let s:curl_get_collections = 'curl -s "https://avoscloud.com/1.1/call/getWorksByCollection"'.s:curl_option.'--data "{\"collectionId\":\"COLLECTION_ID\", \"page\": _PAGE, \"perPage\": _PERPAGE}"'
 
+" 根据朝代搜索
+let s:curl_get_works_by_dynasty = 'curl -s "https://avoscloud.com/1.1/call/getWorksIncludeCountByDynasty"'.s:curl_option.'--data "{\"dynasty\":\"_DYNASTY\", \"page\": _PAGE, \"perPage\": _PERPAGE}"'
 
-let s:curl_get_collections = 'curl -s "https://avoscloud.com/1.1/call/getWorksByCollection"
-            \ -H "authority: avoscloud.com"
-            \ -H "x-lc-ua: LeanCloud-JS-SDK/3.15.0 (Browser)"
-            \ -H "dnt: 1"
-            \ -H "sec-ch-ua-mobile: ?0"
-            \ -H "user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36"
-            \ -H "content-type: application/json;charset=UTF-8"
-            \ -H "x-lc-sign: 8e33bfbb3625e1b6a261487dc7f38dca,1633015485114"
-            \ -H "x-lc-session: saxj96gey4hqsy7wxp4zrnywp"
-            \ -H "x-lc-id: 9pq709je4y36ubi10xphdpovula77enqrz27idozgry7x644"
-            \ -H "x-lc-prod: 1"
-            \ -H "accept: */*"
-            \ -H "origin: http://lib.xcz.im"
-            \ -H "sec-fetch-site: cross-site"
-            \ -H "sec-fetch-mode: cors"
-            \ -H "sec-fetch-dest: empty"
-            \ -H "referer: http://lib.xcz.im/"
-            \ -H "accept-language: zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"
-            \ --data "{\"collectionId\":\"COLLECTION_ID\", \"page\": _PAGE, \"perPage\": _PERPAGE}"'
+" 根据体裁搜索
+let s:curl_get_works_by_kind = 'curl -s "https://avoscloud.com/1.1/call/getWorksIncludeCountByGenreKind"'.s:curl_option.'--data "{\"kind\":\"_KIND\", \"page\": _PAGE, \"perPage\": _PERPAGE}"'
 
-
+" 根据work_id 搜索igsc
 let s:curl_get_by_id_wx = 'curl -s https://igsc.wx.haihui.site/songci/index/WORK_ID/vim -H "User-Agent:vim-plugin"'
+
+" 体裁
+let s:kinds = {'诗': 'shi',
+            \'词': 'ci',
+            \'曲': 'fu',
+            \'赋': 'fu',
+            \'古文': 'wen',
+            \'文言文': 'wen',
+            \'歌': 'fu',
+            \}
+
+let s:dynasties = ['商','周','秦','汉','三国','晋','南北朝','隋','唐','五代十国','宋','金','元','明','清','现代']
+
 
 if !exists('g:gsc_show_url')
     let g:gsc_show_url = 0
@@ -184,8 +100,6 @@ function! GscAppend(query)
     if l:search
         let l:curl_ = substitute(s:curl, 'SEARCH_PLACEHOLDER', l:query, '')
         let l:result = system(l:curl_)
-        let l:result = substitute(l:result, '^.*result', '', 'g')
-        let l:result = '{"result'.l:result
         let l:json_res = gsc#json_decode(l:result)
         let l:num_serial = 0
         for item in l:json_res['result']
@@ -214,10 +128,10 @@ endfunction
 function! GscCollect(words)
     let l:words = substitute(a:words, '\s', '', 'g')
     let l:words_md5 = gsc#md5(l:words)
-    let l:prefix = '@'
+    let l:prefix = '#'
     let l:map_file = g:gsc_map_cache.'/'.l:prefix.l:words_md5[:1]
     if !isdirectory(l:map_file)
-        let l:prefix = '#'
+        let l:prefix = '@'
         let l:map_file = g:gsc_map_cache.'/'.l:prefix.l:words_md5[:1]
         if !isdirectory(l:map_file)
             echo '找不到id'
@@ -442,14 +356,19 @@ function! GscAuthorInfo(author_name)
     setlocal ft=gsc
 endfunction
 
-function! s:render_by_page(author_id, page, page_size, author_name)
-    let l:curl = substitute(s:curl_get_works_by_author, 'AUTHOR_ID', a:author_id, '')
-    let l:curl = substitute(l:curl, '_PAGE', a:page, '')
-    let l:curl = substitute(l:curl, '_PERPAGE', a:page_size, '')
-    echo '正在获取'.a:author_name.'第'.a:page.'页作品🔥 ...'
-    let l:res = gsc#json_decode(system(l:curl))['result']
+function! s:render_by_page(page, page_size, name, url, depth=1)
+    echo '正在获取 '.a:name.' 第'.abs(a:page).'页作品🔥 ...'
+    if a:depth == 2
+        let l:res = gsc#json_decode(system(a:url))['result']['works']
+    else
+        let l:res = gsc#json_decode(system(a:url))['result']
+    endif
+    if a:page <= 0
+        let l:num_serial = 0
+    else
+        let l:num_serial  = (a:page - 1) * a:page_size
+    endif
     let l:buf = ''
-    let l:num_serial  = (a:page - 1) * a:page_size
     for item in l:res
         let l:num_serial = l:num_serial + 1
         let l:work_md5 = gsc#md5('#'.item['objectId'])
@@ -477,7 +396,7 @@ function! s:render_by_page(author_id, page, page_size, author_name)
         let l:buf = l:buf.join(gsc#process_item(l:item, l:num_serial, '#'), "\n")."\n"
     endfor
     call gsc#write_to_buffer(l:buf)
-    if a:page == 1
+    if a:page <= 1
         normal! ggdd
     endif
     call gsc#clear_echo_output()
@@ -514,7 +433,7 @@ function! s:render_quote_by_page(author_id, page, page_size, author_name)
         endif
     endfor
     call gsc#write_to_buffer(l:buf)
-    if a:page == 1 || a:page <= 0
+    if a:page <= 1
         normal! ggdd
     endif
     call gsc#clear_echo_output()
@@ -542,11 +461,41 @@ function! GscAuthorWorks(author_name, ...)
     call gsc#clear()
     let l:total_num = 0
     for page in range(l:page)
-        let l:total_num = l:total_num + s:render_by_page(l:author_id, page + 1, l:page_size, l:author_name)
+        let l:curl = substitute(s:curl_get_works_by_author, 'AUTHOR_ID', l:author_id, '')
+        let l:curl = substitute(l:curl, '_PAGE', page, '')
+        let l:curl = substitute(l:curl, '_PERPAGE', l:page_size, '')
+        let l:total_num = l:total_num + s:render_by_page(page + 1, l:page_size, l:author_name, l:curl)
     endfor
     echo '总共获取'.l:total_num.'条记录，用时'.reltimestr(reltime(l:start_time)).'s'
 endfunction
 
+
+function! GscDynastyWorks(dynasty, ...)
+    let l:dynasty = substitute(a:dynasty, '\s', '', 'g')
+    if index(s:dynasties, l:dynasty) < 0
+        echo '朝代 '.l:dynasty. ' 不存在， 你可以输入以下朝代: '.join(s:dynasties, ', ')
+        return
+    endif
+    let l:page = 1
+    let l:page_size = 20
+    if len(a:000) >= 2
+        let l:page = a:000[0] + 0
+        let l:page_size = a:000[1] + 0
+    endif
+    if len(a:000) >= 1
+        let l:page = a:000[0] + 0
+    endif
+    let l:start_time = reltime()
+    call gsc#clear()
+    let l:total_num = 0
+    for page in range(l:page)
+        let l:curl = substitute(s:curl_get_works_by_dynasty, '_DYNASTY', l:dynasty, '')
+        let l:curl = substitute(l:curl, '_PAGE', page, '')
+        let l:curl = substitute(l:curl, '_PERPAGE', l:page_size, '')
+        let l:total_num = l:total_num + s:render_by_page(page + 1, l:page_size, l:dynasty, l:curl, 2)
+    endfor
+    echo '总共获取'.l:total_num.'条记录，用时'.reltimestr(reltime(l:start_time)).'s'
+endfunction
 
 function! GscCollectionWorks(collection_name, ...)
     let l:collection_name = a:collection_name
@@ -622,9 +571,13 @@ function! GscQuotes(...)
     call gsc#clear()
     let l:total_num = 0
     if l:page != -1
-        for page in range(l:page)
-            let l:total_num = l:total_num + s:render_quote_by_page(l:author_id, page + 1, l:page_size, l:author_name)
-        endfor
+        if l:page < 0
+            let l:total_num = l:total_num + s:render_quote_by_page(l:author_id, l:page, l:page_size, l:author_name)
+        else
+            for page in range(l:page)
+                let l:total_num = l:total_num + s:render_quote_by_page(l:author_id, page + 1, l:page_size, l:author_name)
+            endfor
+        endif
     else
         if len(l:author_name) > 0
             let l:num = 50
@@ -636,6 +589,61 @@ function! GscQuotes(...)
             let l:page = 1
         endif
         let l:total_num = l:total_num + s:render_quote_by_page(l:author_id, l:page, l:page_size, l:author_name)
+    endif
+    echo '总共获取'.l:total_num.'条记录，用时'.reltimestr(reltime(l:start_time)).'s'
+endfunction
+
+function! GscKindWorks(kind, ...)
+    let l:page = 1
+    let l:page_size = 20
+    if len(a:000) >= 2
+        let l:page = a:000[0] + 0
+        let l:page_size = a:000[1] + 0
+    elseif len(a:000) >= 1
+        let l:page = a:000[0] + 0
+    endif
+    let l:kind_id = ''
+    if !has_key(s:kinds, a:kind)
+        echo '找不到体裁 '.a:kind.'. 你可以输入以下体裁: '.join(sort(keys(s:kinds)), ', ')
+        return
+    else
+        let l:kind_id = s:kinds[a:kind]
+    endif
+    let l:start_time = reltime()
+    call gsc#clear()
+    let l:total_num = 0
+    if l:page != -1
+        if l:page < 0
+            let l:curl = substitute(s:curl_get_works_by_kind, '_KIND', l:kind_id, '')
+            let l:curl = substitute(l:curl, '_PAGE', abs(l:page), '')
+            let l:curl = substitute(l:curl, '_PERPAGE', l:page_size, '')
+            let l:total_num = l:total_num + s:render_by_page(l:page, l:page_size, a:kind, l:curl,  2)
+        else
+            for page in range(l:page)
+                let l:curl = substitute(s:curl_get_works_by_kind, '_KIND', l:kind_id, '')
+                let l:curl = substitute(l:curl, '_PAGE', page, '')
+                let l:curl = substitute(l:curl, '_PERPAGE', l:page_size, '')
+                let l:total_num = l:total_num + s:render_by_page(page + 1, l:page_size, a:kind, l:curl, 2)
+            endfor
+        endif
+    else
+        if l:kind_id == 'shi'
+            let l:num = 761778
+        elseif l:kind_id == 'ci'
+            let l:num = 72945
+        elseif l:kind_id == 'fu'
+            let l:num = 235
+        else
+            let l:num = 7406
+        endif
+        let l:page = -float2nr(l:num / l:page_size * gsc#random())
+        if l:page == 0
+            let l:page = 1
+        endif
+        let l:curl = substitute(s:curl_get_works_by_kind, '_KIND', l:kind_id, '')
+        let l:curl = substitute(l:curl, '_PAGE', l:page, '')
+        let l:curl = substitute(l:curl, '_PERPAGE', l:page_size, '')
+        let l:total_num = l:total_num + s:render_by_page(l:page, l:page_size, a:kind, l:curl, 2)
     endif
     echo '总共获取'.l:total_num.'条记录，用时'.reltimestr(reltime(l:start_time)).'s'
 endfunction
@@ -675,6 +683,8 @@ command! -nargs=+ GscCollect call GscCollect(<q-args>)
 command! -nargs=? GscCollectList call GscCollectList(<q-args>)
 command! -narg=+ GscAuthorInfo call GscAuthorInfo(<q-args>)
 command! -nargs=+  GscAuthorWorks call GscAuthorWorks(<f-args>)
+command! -nargs=+  GscDynastyWorks call GscDynastyWorks(<f-args>)
+command! -nargs=+  GscKindWorks call GscKindWorks(<f-args>)
 command! -nargs=*  GscQuotes call GscQuotes(<f-args>)
 command! -nargs=?  GscCollectEdit call GscCollectEdit()
 command! -nargs=+  GscCollectionWorks call GscCollectionWorks(<f-args>)
