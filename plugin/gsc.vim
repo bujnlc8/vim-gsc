@@ -641,7 +641,7 @@ function! GscKindWorks(kind, ...)
             let l:page = 1
         endif
         let l:curl = substitute(s:curl_get_works_by_kind, '_KIND', l:kind_id, '')
-        let l:curl = substitute(l:curl, '_PAGE', l:page, '')
+        let l:curl = substitute(l:curl, '_PAGE', abs(l:page), '')
         let l:curl = substitute(l:curl, '_PERPAGE', l:page_size, '')
         let l:total_num = l:total_num + s:render_by_page(l:page, l:page_size, a:kind, l:curl, 2)
     endif
