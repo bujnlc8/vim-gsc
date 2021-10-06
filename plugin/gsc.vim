@@ -460,12 +460,19 @@ function! GscAuthorWorks(author_name, ...)
     let l:start_time = reltime()
     call gsc#clear()
     let l:total_num = 0
-    for page in range(l:page)
+    if l:page < 0
         let l:curl = substitute(s:curl_get_works_by_author, 'AUTHOR_ID', l:author_id, '')
-        let l:curl = substitute(l:curl, '_PAGE', page, '')
+        let l:curl = substitute(l:curl, '_PAGE', abs(l:page), '')
         let l:curl = substitute(l:curl, '_PERPAGE', l:page_size, '')
-        let l:total_num = l:total_num + s:render_by_page(page + 1, l:page_size, l:author_name, l:curl)
-    endfor
+        let l:total_num = l:total_num + s:render_by_page(l:page, l:page_size, l:author_name, l:curl)
+    else
+        for page in range(l:page)
+            let l:curl = substitute(s:curl_get_works_by_author, 'AUTHOR_ID', l:author_id, '')
+            let l:curl = substitute(l:curl, '_PAGE', page, '')
+            let l:curl = substitute(l:curl, '_PERPAGE', l:page_size, '')
+            let l:total_num = l:total_num + s:render_by_page(page + 1, l:page_size, l:author_name, l:curl)
+        endfor
+    endif
     echo '总共获取'.l:total_num.'条记录，用时'.reltimestr(reltime(l:start_time)).'s'
 endfunction
 
@@ -488,12 +495,19 @@ function! GscDynastyWorks(dynasty, ...)
     let l:start_time = reltime()
     call gsc#clear()
     let l:total_num = 0
-    for page in range(l:page)
+    if l:page < 0
         let l:curl = substitute(s:curl_get_works_by_dynasty, '_DYNASTY', l:dynasty, '')
-        let l:curl = substitute(l:curl, '_PAGE', page, '')
+        let l:curl = substitute(l:curl, '_PAGE', abs(l:page()), '')
         let l:curl = substitute(l:curl, '_PERPAGE', l:page_size, '')
-        let l:total_num = l:total_num + s:render_by_page(page + 1, l:page_size, l:dynasty, l:curl, 2)
-    endfor
+        let l:total_num = l:total_num + s:render_by_page(l:page, l:page_size, l:dynasty, l:curl, 2)
+    else
+        for page in range(l:page)
+            let l:curl = substitute(s:curl_get_works_by_dynasty, '_DYNASTY', l:dynasty, '')
+            let l:curl = substitute(l:curl, '_PAGE', page, '')
+            let l:curl = substitute(l:curl, '_PERPAGE', l:page_size, '')
+            let l:total_num = l:total_num + s:render_by_page(page + 1, l:page_size, l:dynasty, l:curl, 2)
+        endfor
+    endif
     echo '总共获取'.l:total_num.'条记录，用时'.reltimestr(reltime(l:start_time)).'s'
 endfunction
 
@@ -516,27 +530,35 @@ function! GscCollectionWorks(collection_name, ...)
     let l:start_time = reltime()
     call gsc#clear()
     let l:total_num = 0
-    for page in range(l:page)
-        let l:total_num = l:total_num + s:render_collection_by_page(l:collection_id, page + 1, l:page_size, l:collection_name)
-    endfor
+    if l:page < 0
+        let l:total_num = l:total_num + s:render_collection_by_page(l:collection_id, l:page, l:page_size, l:collection_name)
+    else
+        for page in range(l:page)
+            let l:total_num = l:total_num + s:render_collection_by_page(l:collection_id, page + 1, l:page_size, l:collection_name)
+        endfor
+    endif
     echo '总共获取'.l:total_num.'条记录，用时'.reltimestr(reltime(l:start_time)).'s'
 endfunction
 
 function! s:render_collection_by_page(collection_id, page, page_size, collection_name)
     let l:curl = substitute(s:curl_get_collections, 'COLLECTION_ID', a:collection_id, '')
-    let l:curl = substitute(l:curl, '_PAGE', a:page, '')
+    let l:curl = substitute(l:curl, '_PAGE', abs(a:page), '')
     let l:curl = substitute(l:curl, '_PERPAGE', a:page_size, '')
-    echo '正在获取合集'.a:collection_name.'第'.a:page.'页作品🔥 ...'
+    echo '正在获取合集'.a:collection_name.'第'.abs(a:page).'页作品🔥 ...'
     let l:res = gsc#json_decode(system(l:curl))['result']
     let l:buf = ''
-    let l:num_serial  = (a:page - 1) * a:page_size
+    if a:page <= 0
+        let l:num_serial = 0
+    else
+        let l:num_serial  = (a:page - 1) * a:page_size
+    endif
     for item in l:res
         let l:num_serial = l:num_serial + 1
         let l:ll = gsc#process_item(s:process_item(item['objectId'], '#'), l:num_serial, '#')
         let l:buf = l:buf.join(l:ll, "\n")."\n"
     endfor
     call gsc#write_to_buffer(l:buf)
-    if a:page == 1
+    if a:page <= 1
         normal! ggdd
     endif
     call gsc#clear_echo_output()
