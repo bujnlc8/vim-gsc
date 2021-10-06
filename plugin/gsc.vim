@@ -89,7 +89,7 @@ function! GscAppend(query)
     if g:gsc_cache
         if filereadable(l:cache_path)
             try
-                let l:buf = system('cat "' .l:cache_path.'" | '.g:gsc_cache_comp_algo.' -d')
+                let l:buf = system('cat ' .l:cache_path.' | '.g:gsc_cache_comp_algo.' -d')
                 let l:search = 0
             catch
                 let l:search = 1
@@ -186,7 +186,7 @@ function! s:process_item(work_id, work_type)
         if g:gsc_cache
             if filereadable(l:cache_path)
                 try
-                    let l:res = system('cat "' .l:cache_path.'" | '.g:gsc_cache_comp_algo.' -d')
+                    let l:res = system('cat ' .l:cache_path.'| '.g:gsc_cache_comp_algo.' -d')
                 catch
                     let l:res = ''
                 endtry
@@ -227,7 +227,7 @@ function! s:process_item(work_id, work_type)
         if g:gsc_wx_cache
             if filereadable(l:cache_path)
                 try
-                    let l:res = system('cat "' .l:cache_path.'" | '.g:gsc_cache_comp_algo.' -d')
+                    let l:res = system('cat ' .l:cache_path.' | '.g:gsc_cache_comp_algo.' -d')
                 catch
                     let l:res = ''
                 endtry
