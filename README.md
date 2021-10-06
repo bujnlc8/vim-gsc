@@ -84,6 +84,12 @@ OR
 
 *   `:GscQuotes + [page + [page_size + [author]]]`, it will query the quotes from xcz website, you can give three optional arguments. if you set the page to -1, it will return quotes randomly.
 
+*   `:GscDynastyWorks + dynasty + [page + [page_size]]`, it will query the works by dynasty, all supported words is  `商, 周, 秦, 汉, 三国, 晋, 南北朝, 隋, 唐, 五代十国, 宋, 金, 元, 明, 清, 现代`. 
+
+*   `:GscCollectionWorks + collection_name + [page + [page_size]]`, it wll query the works by collection_name, you cann get the supported word by run `:GscCollectionList`.
+
+**Attention, all miues page will be change to its opposite number, and return only the pageth result**
+
 ## Appearance
 
 [![4OO2uV.png](https://z3.ax1x.com/2021/10/04/4OO2uV.png)](https://imgtu.com/i/4OO2uV)
