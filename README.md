@@ -2,7 +2,7 @@
 
 ## Install
 
-*   Clone the repository into `.vim/plugin`
+*   Clone the repository into `~/.vim/plugin`
 
 OR
 
@@ -14,7 +14,7 @@ OR
 
 ## Command
 
-*   `:GscAppend + words`, it gets result from [xcz](http://lib.xcz.im) and it only get 30 works. it will append the result to current buffer, if you want put the result to the buffer respectively, you can use `:Gsc`
+*   `:GscAppend + words`, it fetches result from [xcz](http://lib.xcz.im) and it only get 30 works. it will append the result to current buffer, if you want put the result to the buffer respectively, you can use `:Gsc`
 
     You can set following options for the command.
 
@@ -33,7 +33,7 @@ OR
 
     ```
 
-*   `:GscWxAppend + words`, it gets result from the weixin micro app `i古诗词` and not only 30 works. it will append the result to current buffer, if you want put the result to the buffer respectively, you can use `:GscWx`
+*   `:GscWxAppend + words`, it fetches result from the weixin micro app `i古诗词` and not only 30 works. it will append the result to current buffer, if you want put the result to the buffer respectively, you can use `:GscWx`
 
     Below is the QR code of `i古诗词`:
 
@@ -72,23 +72,23 @@ OR
 
 *   `:GscWxRand + [num]`, fetch num works from wx randomly, if num is not set, num equals 1.
 
-*   `:GscCollect + $title + $author + $content[2]`, collect the specified item, you must already fetch the work locally before collect it. 
+*   `:GscCollect + $title + $author + $content[:2]`, collect the specified item, you must already fetch the work locally before collect it. 
 
-*   `:GscCollectList + [num|filter_str]`, if you do not give the args, it will return all your collected works, if you give a number, it will return the top n works, if you give a string,  it will return all youur collected works which contains the filter_str as possible.
+*   `:GscCollectList + [num|filter_str]`, if you do not give the args, it will fetch all your collected works, if you give a number, it will fetch the top n works, if you give a string,  it will fetch all youur collected works which contains the filter_str as possible.
 
 *   `:GscCollectEdit`, you can edit the collect file in a new tab.
 
-*   `:GscAuthorInfo + author`, it will return the author info from xcz website.
+*   `:GscAuthorInfo + author`, it will fetch the author info from xcz website.
 
-*   `:GscAuthorWorks + author + [page + [page_size]]`, it will query the works by author name, if you give the page argument, it will return all works whose page is between 1 and page, you can give the page_size argument also.
+*   `:GscAuthorWorks + author + [page + [page_size]]`, it will fetch the works by author name, if you give the page argument, it will fetch all works whose page is between 1 and page, you can give the page_size argument also.
 
-*   `:GscQuotes + [page + [page_size + [author]]]`, it will query the quotes from xcz website, you can give three optional arguments. if you set the page to -1, it will return quotes randomly.
+*   `:GscQuotes + [page + [page_size + [author]]]`, it will fetch the quotes from xcz website, you can give three optional arguments. if you set the page to -1, it will fetch quotes randomly.
 
-*   `:GscDynastyWorks + dynasty + [page + [page_size]]`, it will query the works by dynasty, all supported words is  `商, 周, 秦, 汉, 三国, 晋, 南北朝, 隋, 唐, 五代十国, 宋, 金, 元, 明, 清, 现代`. 
+*   `:GscDynastyWorks + dynasty + [page + [page_size]]`, it will fetch the works by dynasty, all supported words is  `商, 周, 秦, 汉, 三国, 晋, 南北朝, 隋, 唐, 五代十国, 宋, 金, 元, 明, 清, 现代`. 
 
-*   `:GscCollectionWorks + collection_name + [page + [page_size]]`, it wll query the works by collection_name, you cann get the supported word by run `:GscCollectionList`.
+*   `:GscCollectionWorks + collection_name + [page + [page_size]]`, it wll fetch the works by collection_name, you cann get the supported word by run `:GscCollectionList`.
 
-**Attention, all miues page will be change to its opposite number, and return only the pageth result**
+**Attention, all minus page will be changed to its opposite number, and fetch only the pageth result.**
 
 ## Appearance
 
