@@ -134,19 +134,19 @@ function! GscCollect(words)
         let l:prefix = '@'
         let l:map_file = g:gsc_map_cache.'/'.l:prefix.l:words_md5[:1]
         if !isdirectory(l:map_file)
-            echo '找不到id'
+            echo '找不到id路径 '.l:map_file
             return
         else
             let l:map_file = l:map_file.'/'.l:words_md5[2:3]
             if !filereadable(l:map_file)
-                echo '找不到id'
+                echo '找不到id路径 '.l:map_file
                 return
             endif
         endif
     else
         let l:map_file = l:map_file.'/'.l:words_md5[2:3]
         if !filereadable(l:map_file)
-            echo '找不到id'
+            echo '找不到id路径 '.l:map_file
             return
         endif
     endif
@@ -165,7 +165,7 @@ function! GscCollect(words)
     try
         if filereadable(g:gsc_collect_path)
             for x in readfile(g:gsc_collect_path)
-                if x == l:prefix.l:object_id
+                if match(x, l:prefix.l:object_id) != -1
                     echo '收藏成功'
                     return
                 endif
@@ -497,7 +497,7 @@ function! GscDynastyWorks(dynasty, ...)
     let l:total_num = 0
     if l:page < 0
         let l:curl = substitute(s:curl_get_works_by_dynasty, '_DYNASTY', l:dynasty, '')
-        let l:curl = substitute(l:curl, '_PAGE', abs(l:page()), '')
+        let l:curl = substitute(l:curl, '_PAGE', abs(l:page), '')
         let l:curl = substitute(l:curl, '_PERPAGE', l:page_size, '')
         let l:total_num = l:total_num + s:render_by_page(l:page, l:page_size, l:dynasty, l:curl, 2)
     else
