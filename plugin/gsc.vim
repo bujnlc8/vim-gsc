@@ -110,7 +110,7 @@ function! GscAppend(query)
         let l:buf = l:buf.'GgGg'.len(l:json_res['result'])
         if g:gsc_cache
             try
-                call system("echo '".l:buf."' | ".g:gsc_cache_comp_algo." --best > ".l:cache_path)
+                call system("echo -n '".l:buf."' | ".g:gsc_cache_comp_algo." --best > ".l:cache_path)
             catch
                 call delete(l:cache_path)
             endtry
@@ -212,7 +212,7 @@ function! s:process_item(work_id, work_type)
             if g:gsc_cache
                 try
                     let l:buf = gsc#json_encode(l:res)
-                    call system("echo '".l:buf."' | ".g:gsc_cache_comp_algo." --best > ".l:cache_path)
+                    call system("echo -n '".l:buf."' | ".g:gsc_cache_comp_algo." --best > ".l:cache_path)
                 catch
                     call delete(l:cache_path)
                 endtry
@@ -237,7 +237,7 @@ function! s:process_item(work_id, work_type)
             let l:res = system(substitute(s:curl_get_by_id_wx, 'WORK_ID', a:work_id, 'g'))
             if g:gsc_wx_cache
                 try
-                    call system("echo '".l:buf."' | ".g:gsc_cache_comp_algo." --best > ".l:cache_path)
+                    call system("echo -n '".l:buf."' | ".g:gsc_cache_comp_algo." --best > ".l:cache_path)
                 catch
                     call delete(l:cache_path)
                 endtry
@@ -388,7 +388,7 @@ function! s:render_by_page(page, page_size, name, url, depth=1)
                     \}
         if g:gsc_cache && !filereadable(l:cache_path)
             try
-                call system("echo '".gsc#json_encode(l:item)."' | ".g:gsc_cache_comp_algo." --best > ".l:cache_path)
+                call system("echo -n '".gsc#json_encode(l:item)."' | ".g:gsc_cache_comp_algo." --best > ".l:cache_path)
             catch
                 call delete(l:cache_path)
             endtry

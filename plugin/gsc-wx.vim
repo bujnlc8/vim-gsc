@@ -102,7 +102,7 @@ function! GscWxAppend(query)
         let l:buf = l:buf.'GgGg'.len(l:json_res['data']['data'])
         if g:gsc_wx_cache
             try
-                call system("echo '".l:buf."' | ".g:gsc_cache_comp_algo.'  > '.l:comp_cache_path)
+                call system("echo -n '".l:buf."' | ".g:gsc_cache_comp_algo.'  > '.l:comp_cache_path)
             catch
                 call delete(l:comp_cache_path)
                 try
