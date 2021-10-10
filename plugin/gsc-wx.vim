@@ -91,8 +91,6 @@ function! GscWxAppend(query)
     if l:search
         let l:curl_ = substitute(s:curl, 'SEARCH_PLACEHOLDER', l:query, '')
         let l:result = system(l:curl_)
-        let l:result = substitute(l:result, '^.*code', '', 'g')
-        let l:result = '{"code'.l:result
         let l:json_res = gsc#json_decode(l:result)
         let l:num_serial = 0
         for item in l:json_res['data']['data']
@@ -141,8 +139,6 @@ function! GscWxRand(num)
     echo '正在随机获取'.l:num.'条记录 🔥...'
     let l:start_time = reltime()
     let l:result = system(s:rand_curl)
-    let l:result = substitute(l:result, '^.*code', '', 'g')
-    let l:result = '{"code'.l:result
     let l:json_res = gsc#json_decode(l:result)
     let l:num_serial = 0
     for item in l:json_res['data']['data']
@@ -150,7 +146,13 @@ function! GscWxRand(num)
         if l:num_serial > l:num
             break
         endif
+        if a:num == 1
+            let l:num_serial = 0
+        endif
         let l:buf = l:buf.join(gsc#process_item(item, l:num_serial, '@'), "\n")."\n"
+        if a:num == 1
+            break
+        endif
     endfor
     call gsc#clear()
     call gsc#write_to_buffer(l:buf)
