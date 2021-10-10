@@ -9,7 +9,7 @@ OR
 *   Use the plugin manager tool, like `vim-plug`, and put the following line in your `.vimrc`
 
     ````
-    Plug 'linghaihui/vim-gsc'
+    Plug 'bujnlc8/vim-gsc'
     ````
 
 ## Command
