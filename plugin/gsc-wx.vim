@@ -156,7 +156,7 @@ function! GscWxRand(num)
     endfor
     call gsc#clear()
     call gsc#write_to_buffer(l:buf)
-    normal! k2dd
+    "normal! k2dd
     call gsc#clear_echo_output()
     echo '共获取'.l:num.'条结果，用时 '.reltimestr(reltime(l:start_time)).'s'
     normal ggdd
