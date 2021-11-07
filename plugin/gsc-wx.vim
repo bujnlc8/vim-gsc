@@ -1,5 +1,5 @@
-let s:curl = 'curl -s https://igsc.wx.haihui.site/songci/query/SEARCH_PLACEHOLDER/main/0 -H "User-Agent:vim-plugin"'
-let s:rand_curl = 'curl -s https://igsc.wx.haihui.site/songci/index/all/vim -H "User-Agent:vim-plugin"'
+let s:curl = 'curl -s https://igsc.wx.haihui.site/gsc/query/SEARCH_PLACEHOLDER/main/0 -H "User-Agent:vim-plugin"'
+let s:rand_curl = 'curl -s https://igsc.wx.haihui.site/gsc/index/all/vim -H "User-Agent:vim-plugin"'
 
 if !exists('g:gsc_wx_show_audio')
     let g:gsc_wx_show_audio = 1

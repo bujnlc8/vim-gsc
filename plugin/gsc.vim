@@ -25,7 +25,7 @@ let s:curl_get_works_by_dynasty = 'curl -s "https://avoscloud.com/1.1/call/getWo
 let s:curl_get_works_by_kind = 'curl -s "https://avoscloud.com/1.1/call/getWorksIncludeCountByGenreKind"'.s:curl_option.'--data "{\"kind\":\"_KIND\", \"page\": _PAGE, \"perPage\": _PERPAGE}"'
 
 " 根据work_id 搜索igsc
-let s:curl_get_by_id_wx = 'curl -s https://igsc.wx.haihui.site/songci/index/WORK_ID/vim -H "User-Agent:vim-plugin"'
+let s:curl_get_by_id_wx = 'curl -s https://igsc.wx.haihui.site/gsc/index/WORK_ID/vim -H "User-Agent:vim-plugin"'
 
 " 体裁
 let s:kinds = {'诗': 'shi',
