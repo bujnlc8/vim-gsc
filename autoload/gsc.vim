@@ -171,7 +171,7 @@ function! gsc#process_item(item, num_serial, work_type)
         if g:gsc_highlight
             let l:intro = nr2char(3).join(split(l:intro, "\n"), "\n".nr2char(3))
         endif
-        let l:ll = add(l:ll, nr2char(1)."评析：".nr2char(1)."\n".l:intro."\n")
+        let l:ll = add(l:ll, nr2char(1)."简介：".nr2char(1)."\n".l:intro."\n")
     endif
     if g:gsc_wx_show_annotation && !gsc#string_is_empty(l:annotation)
         if g:gsc_highlight
